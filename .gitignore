@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / package
+build/
+dist/
+sdist/
+*.eggs-info/
+
+# pycharme stuff
+.idea/
