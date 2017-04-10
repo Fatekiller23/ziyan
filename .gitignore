@@ -8,6 +8,7 @@ build/
 dist/
 sdist/
 *.eggs-info/
+*.egg-infor/
 
 # pycharm stuff
 .idea/
