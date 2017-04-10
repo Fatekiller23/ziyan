@@ -9,5 +9,5 @@ dist/
 sdist/
 *.eggs-info/
 
-# pycharme stuff
+# pycharm stuff
 .idea/
