@@ -47,4 +47,3 @@ def make_directory(name):
             conf.close()
     except Exception as e:
         traceback.print_exc()
-main()
