@@ -37,7 +37,8 @@ def make_directory(name):
     """
     try:
         if not os.path.exists(name):
-            os.mkdir(name + r'\conf')
+            # os.mkdir(name)
+            os.makedirs(name + r'\conf')
             os.mkdir(name + r'\lua')
             os.mkdir(name + r'\plugins')
             manage = open(name + r'\manage.py', 'w')
@@ -46,3 +47,4 @@ def make_directory(name):
             conf.close()
     except Exception as e:
         traceback.print_exc()
+main()
