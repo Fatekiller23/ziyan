@@ -12,3 +12,7 @@ sdist/
 
 # pycharm stuff
 .idea/
+
+# jupyter notebook stuff
+*.ipynb
+.ipynb_checkpoints/
