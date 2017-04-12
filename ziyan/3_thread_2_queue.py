@@ -8,21 +8,23 @@ class Command(object):
     def __init__(self):
         pass
 
-    def work(self, queues):
+    def work(self, queues, **kwargs):
         while True:
             cmd = 1
             command_queue = queues['command_queue']
             command_queue.put(cmd)
             time.sleep(1)
 
+    def user_logic(self):
+        pass
 
 class Check(object):
     data = '我是check的data'
-    def __init__(self):
 
+    def __init__(self):
         pass
 
-    def work(self, queues):
+    def work(self, queues, **kwargs):
         while True:
             command_queue = queues['command_queue']
             data_queue = queues['data_queue']
@@ -31,41 +33,41 @@ class Check(object):
             if cmd == 1:
                 data_queue.put(Check.data)
 
+    def user_logic(self):
+        pass
 
 class Handler(object):
     def __init__(self):
         pass
 
-    def work(self, queues):
+    def work(self, queues, **kwargs):
         while True:
             data_queue = queues['data_queue']
             data = data_queue.get()
             print(data)
 
+    def user_logic(self):
+        pass
 
 def start():
-    q = {'command_queue': Queue(), 'data_queue': Queue()}
+    queue = {'command_queue': Queue(), 'data_queue': Queue()}
 
     commander = Command()
     checker = Check()
     handler = Handler()
 
-    t1 = Thread(target=commander.work, args=(q,))
-    t1.setDaemon(True)
+    commander.name = 'commander'
+    checker.name = 'checker'
+    handler.name = 'handler'
 
-    t2 = Thread(target=checker.work, args=(q,))
-    t2.setDaemon(True)
+    workers = [commander, checker, handler]
 
-    t3 = Thread(target=handler.work, args=(q,))
-    t3.setDaemon(True)
-
-    t1.start()
-    t2.start()
-    t3.start()
+    for worker in workers:
+        Thread(target=worker.work, args=(queue,), kwargs={'who': worker.name},
+               name='t_%s' % worker.name, daemon=True).start()
 
 
 if __name__ == '__main__':
     start()
     while True:
         time.sleep(1)
-
