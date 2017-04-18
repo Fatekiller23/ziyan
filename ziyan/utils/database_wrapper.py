@@ -1,11 +1,6 @@
 # --*-- coding=utf-8 --*--
 """
-包装 redis 库, 用 lua 脚本作为入队筛选机制
-
-用法：
-db = Redis_wrapper.RedisWrapper(conf)
-db.script_load(lua_file)
-db.enqueue(**kwargs)  #入队
+包装各种数据库模块, 使其易于使用
 """
 import time
 import traceback
@@ -13,6 +8,14 @@ import redis
 
 
 class RedisWrapper:
+    """
+    包装 redis 库, 用 lua 脚本作为入队筛选机制
+
+    用法：
+    db = Redis_wrapper.RedisWrapper(conf)
+    db.script_load(lua_file)
+    db.enqueue(**kwargs)  #入队
+    """
     def __init__(self, conf):
         """
         :param conf: dict, 包含 Redis 的 host, port, db
@@ -49,7 +52,7 @@ class RedisWrapper:
             script = fn.read()
             self.sha = self.db.script_load(script)
 
-    def enqueue(self, **kwargs):
+    def en_queue(self, **kwargs):
         """
         将传入的 dict 传入 Lua 脚本进行处理，默认第一个值为 key
         :param kwargs: dict
@@ -57,11 +60,12 @@ class RedisWrapper:
         """
         eqpt_no = kwargs.pop('eqpt_no')
         timestamp = kwargs.pop('timestamp')
-        data = kwargs.pop('data')
+        tags = kwargs.pop('tags')
+        fields = kwargs.pop('data')
         measurement = kwargs.pop('measurment')
-        return self.db.evalsha(self.sha, 1, eqpt_no, timestamp, data, measurement)
+        return self.db.evalsha(self.sha, 1, eqpt_no, timestamp, tags, fields, measurement)
 
-    def dequeue(self):
+    def de_queue(self):
         """
         Remove and return the first item of the list ``data_queue``
         if ``data_queue`` is an empty list, block indefinitely
@@ -79,3 +83,11 @@ class RedisWrapper:
         Push the data onto the head of the list ``data_queue``
         """
         return self.db.lpush('data_queue', data)
+
+    def flushdb(self):
+        "Delete all keys in the current database"
+        return self.db.flushdb()
+
+    def keys(self, pattern='*'):
+        "Returns a list of keys matching ``pattern``"
+        return self.db.keys(pattern)
