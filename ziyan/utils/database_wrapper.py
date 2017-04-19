@@ -4,6 +4,7 @@
 """
 import time
 import traceback
+
 import redis
 from influxdb import InfluxDBClient
 
@@ -17,6 +18,8 @@ class RedisWrapper:
     db.script_load(lua_file)
     db.enqueue(**kwargs)  #入队
     """
+    conf = {'host': 'localhost', 'port': 6379, 'db': 1}
+
     def __init__(self, conf):
         """
         :param conf: dict, 包含 Redis 的 host, port, db
@@ -26,7 +29,14 @@ class RedisWrapper:
             port=conf.get('port', 6379),
             db=conf.get('db', 0))
         self.db = redis.Redis(connection_pool=pool)
+
+        # 测试redis连通性
         self.connect()
+
+    @classmethod
+    def quick(cls):
+        cls.connect()
+        return cls(cls.conf)
 
     def connect(self):
         """
@@ -61,7 +71,7 @@ class RedisWrapper:
         """
         timestamp = kwargs.pop('timestamp')
         tags = kwargs.pop('tags')
-        fields = kwargs.pop('data')
+        fields = kwargs.pop('fields')
         measurement = kwargs.pop('measurement')
         return self.db.evalsha(self.sha, 1, tags, timestamp, fields, measurement)
 

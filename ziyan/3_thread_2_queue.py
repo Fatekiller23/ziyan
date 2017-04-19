@@ -4,7 +4,10 @@ from queue import Queue
 from threading import Thread
 
 import pendulum
-from utils.util import get_conf
+from lib.Sender import Sender
+
+from ziyan.lib.Sender import Sender
+from ziyan.utils.util import get_conf
 
 
 class Command(object):
@@ -72,6 +75,7 @@ class Handler(object):
     def work(self, queues, **kwargs):
         while True:
             self.data_queue = data_queue = queues['data_queue']
+            self.sender_pipe = queues['sender']
             raw_data = data_queue.get()
             processed_dict = self.user_handle(raw_data)
             self.enque_prepare(processed_dict)
@@ -88,9 +92,9 @@ class Handler(object):
 
         # 从用户字典中获取时间，若没有，补充一个
         timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
-
-        self.data_dict.update({'fields': fields, 'timestamp': timestamp})
-        print(self.data_dict)
+        data = dict(self.data_dict)
+        data.update({'fields': fields, 'timestamp': timestamp})
+        self.sender_pipe.put(data)
         pass
 
     # tag measurement
@@ -128,20 +132,22 @@ class Handler(object):
 
 def start():
     # 队列初始化
-    queue = {'command_queue': Queue(), 'data_queue': Queue()}
+    queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
     all_conf = get_conf('text_file/configuration.toml')
     # 生成三个实例类
     commander = Command(all_conf)
     checker = Check(all_conf)
     handler = Handler(all_conf)
+    sender = Sender(all_conf)
 
     # 给实例赋名字
     commander.name = 'commander'
     checker.name = 'checker'
     handler.name = 'handler'
+    sender.name = 'sender'
 
     # 用于迭代
-    workers = [commander, checker, handler]
+    workers = [commander, checker, handler, sender]
 
     for worker in workers:
         Thread(target=worker.work, args=(queue,), kwargs={'who': worker.name},
