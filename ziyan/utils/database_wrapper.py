@@ -22,9 +22,9 @@ class RedisWrapper:
         :param conf: dict, 包含 Redis 的 host, port, db
         """
         pool = redis.ConnectionPool(
-            host=conf['host'],
-            port=conf['port'],
-            db=conf['db'])
+            host=conf.get('host', 'localhost'),
+            port=conf.get('port', 6379),
+            db=conf.get('db', 0))
         self.db = redis.Redis(connection_pool=pool)
         self.connect()
 
@@ -53,52 +53,55 @@ class RedisWrapper:
             script = fn.read()
             self.sha = self.db.script_load(script)
 
-    def en_queue(self, **kwargs):
+    def enqueue(self, **kwargs):
         """
         将传入的参数传入 Lua 脚本进行处理，默认第一个值为 key
         :param kwargs: 位置参数
         :return: lua 脚本返回值
         """
-        eqpt_no = kwargs.pop('eqpt_no')
         timestamp = kwargs.pop('timestamp')
         tags = kwargs.pop('tags')
         fields = kwargs.pop('data')
-        measurement = kwargs.pop('measurment')
-        return self.db.evalsha(self.sha, 1, eqpt_no, timestamp, tags, fields, measurement)
+        measurement = kwargs.pop('measurement')
+        return self.db.evalsha(self.sha, 1, tags, timestamp, fields, measurement)
 
-    def de_queue(self):
+    def dequeue(self, key):
         """
         Remove and return the first item of the list ``data_queue``
         if ``data_queue`` is an empty list, block indefinitely
         """
-        return self.db.blpop("data_queue")
+        return self.db.blpop(key)
 
-    def get_len(self):
+    def get_len(self, key):
         """
         Return the length of the list ``data_queue``
         """
-        return self.db.llen("data_queue")
+        return self.db.llen(key)
 
-    def queue_back(self, data):
+    def queue_back(self, key, data):
         """
         Push the data onto the head of the list ``data_queue``
         """
-        return self.db.lpush('data_queue', data)
+        return self.db.lpush(key, data)
 
     def flushdb(self):
-        "Delete all keys in the current database"
+        """
+        Delete all keys in the current database
+        """
         return self.db.flushdb()
 
     def keys(self, pattern='*'):
-        "Returns a list of keys matching ``pattern``"
+        """
+        Returns a list of keys matching ``pattern``
+        """
         return self.db.keys(pattern)
 
 
 class InfluxdbWrapper:
     def __init__(self, conf):
         self.db = InfluxDBClient(
-            host=conf['host'],
-            port=conf['port'],
+            host=conf.get('host', 'local'),
+            port=conf.get('port', 8086),
             username=conf['username'],
             password=conf['password'],
             database=conf['db'])

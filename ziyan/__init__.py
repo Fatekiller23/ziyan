@@ -44,7 +44,6 @@ def make_directory(name):
             os.mkdir(name + r'\lua')
             os.mkdir(name + r'\plugins')
             filepath = os.path.split(os.path.realpath(__file__))[0]
-            print(filepath)
 
             for file in glob.glob(filepath + r'\text_file\*.toml'):
                 filename = os.path.join(filepath + '\\text_file\\', file)
