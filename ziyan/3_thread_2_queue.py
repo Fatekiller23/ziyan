@@ -15,7 +15,7 @@ class Command(object):
         self.query_rate = self.conf['query_rate']
         pass
 
-    def work(self, queues, ):
+    def work(self, queues, **kwargs):
         # get command queue
         self.command_queue = command_queue = queues['command_queue']
 
@@ -40,7 +40,7 @@ class Check(object):
         self.conf = configuration['check']
         pass
 
-    def work(self, queues, ):
+    def work(self, queues, **kwargs):
         # 在实例中维持queue，待日后使用
         self.command_queue = command_queue = queues['command_queue']
         self.data_queue = data_queue = queues['data_queue']
@@ -69,7 +69,7 @@ class Handler(object):
         self.field_name_list = self.conf['field_name_list']
         pass
 
-    def work(self, queues, ):
+    def work(self, queues, **kwargs):
         while True:
             self.data_queue = data_queue = queues['data_queue']
             raw_data = data_queue.get()
@@ -143,11 +143,8 @@ def start():
     # 用于迭代
     workers = [commander, checker, handler]
 
-    # for worker in workers:
-    #     Thread(target=worker.work, args=(queue,), kwargs={'who': worker.name},
-    #            name='t_%s' % worker.name, daemon=True).start()
     for worker in workers:
-        Thread(target=worker.work, args=(queue,),
+        Thread(target=worker.work, args=(queue,), kwargs={'who': worker.name},
                name='t_%s' % worker.name, daemon=True).start()
 
 
