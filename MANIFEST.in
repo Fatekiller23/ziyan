@@ -1,0 +1,1 @@
+recursive-include ziyan\text_file *.lua *.toml
