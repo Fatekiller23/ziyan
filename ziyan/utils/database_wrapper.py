@@ -54,8 +54,8 @@ class RedisWrapper:
 
     def en_queue(self, **kwargs):
         """
-        将传入的 dict 传入 Lua 脚本进行处理，默认第一个值为 key
-        :param kwargs: dict
+        将传入的参数传入 Lua 脚本进行处理，默认第一个值为 key
+        :param kwargs: 位置参数
         :return: lua 脚本返回值
         """
         eqpt_no = kwargs.pop('eqpt_no')
