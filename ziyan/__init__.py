@@ -3,6 +3,8 @@
 import argparse
 import os
 import traceback
+import shutil
+import glob
 
 
 def main():
@@ -41,9 +43,16 @@ def make_directory(name):
             os.makedirs(name + r'\conf')
             os.mkdir(name + r'\lua')
             os.mkdir(name + r'\plugins')
-            manage = open(name + r'\manage.py', 'w')
-            conf = open(name + r'\conf\config.toml', 'w')
-            manage.close()
-            conf.close()
+            filepath = os.path.split(os.path.realpath(__file__))[0]
+
+            for file in glob.glob(filepath + r'\text_file\*.toml'):
+                filename = os.path.join(filepath + '\\text_file\\', file)
+                shutil.copy(filename, name + r'\conf\config.toml')
+
+            for file in glob.glob(filepath + r'\text_file\*.lua'):
+                filename = os.path.join(filepath + '\\text_file\\', file)
+                shutil.copy(filename, name + r'\lua\enque_script.lua')
+
+            shutil.copy(filepath+r'\script\manage.py', name + r'\manage.py')
     except Exception as e:
         traceback.print_exc()
