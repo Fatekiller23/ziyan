@@ -53,9 +53,5 @@ class Sender:
 
         if self.to_where == 'redis':
             self.redis.script_load(r'D:\project\ziyan\ziyan\text_file\enque_script.lua')
-            print(self.redis.en_queue(timestamp=timestamp, tags=tags,
-                                      fields=fields, measurement=measurement))
-
-
-"""
-which 表明怎么处理"""
+            print(self.redis.enqueue(timestamp=timestamp, tags=tags,
+                                     fields=fields, measurement=measurement))
