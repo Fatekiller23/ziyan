@@ -33,11 +33,6 @@ class RedisWrapper:
         # 测试redis连通性
         self.connect()
 
-    @classmethod
-    def quick(cls):
-        cls.connect()
-        return cls(cls.conf)
-
     def connect(self):
         """
         初始化连接 Redis 数据库, 确保 redis 连接成功 
