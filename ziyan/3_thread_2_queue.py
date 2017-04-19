@@ -4,7 +4,10 @@ from queue import Queue
 from threading import Thread
 
 import pendulum
-from utils.util import get_conf
+from lib.Sender import Sender
+
+from ziyan.lib.Sender import Sender
+from ziyan.utils.util import get_conf
 
 
 class Command(object):
@@ -134,6 +137,7 @@ def start():
     commander = Command(all_conf)
     checker = Check(all_conf)
     handler = Handler(all_conf)
+    sender = Sender()
 
     # 给实例赋名字
     commander.name = 'commander'
@@ -146,6 +150,8 @@ def start():
     for worker in workers:
         Thread(target=worker.work, args=(queue,), kwargs={'who': worker.name},
                name='t_%s' % worker.name, daemon=True).start()
+
+        # 开启sender
 
 
 if __name__ == '__main__':
