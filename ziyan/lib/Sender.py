@@ -52,6 +52,6 @@ class Sender:
         measurement = msgpack.packb(data.pop('measurement'))
 
         if self.to_where == 'redis':
-            self.redis.script_load(r'D:\project\ziyan\ziyan\text_file\enque_script.lua')
+            self.redis.script_load(r'text_file\enque_script.lua')
             print(self.redis.enqueue(timestamp=timestamp, tags=tags,
                                      fields=fields, measurement=measurement))
