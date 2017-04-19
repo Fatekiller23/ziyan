@@ -5,6 +5,7 @@
 import time
 import traceback
 import redis
+from influxdb import InfluxDBClient
 
 
 class RedisWrapper:
@@ -12,7 +13,7 @@ class RedisWrapper:
     包装 redis 库, 用 lua 脚本作为入队筛选机制
 
     用法：
-    db = Redis_wrapper.RedisWrapper(conf)
+    db = database_wrapper.RedisWrapper(conf)
     db.script_load(lua_file)
     db.enqueue(**kwargs)  #入队
     """
@@ -34,7 +35,7 @@ class RedisWrapper:
         """
         while True:
             try:
-                a = self.db.keys()
+                a = self.keys()
                 del a
                 break
             except Exception as e:
@@ -91,3 +92,13 @@ class RedisWrapper:
     def keys(self, pattern='*'):
         "Returns a list of keys matching ``pattern``"
         return self.db.keys(pattern)
+
+
+class InfluxdbWrapper:
+    def __init__(self, conf):
+        self.db = InfluxDBClient(
+            host=conf['host'],
+            port=conf['port'],
+            username=conf['username'],
+            password=conf['password'],
+            database=conf['db'])
