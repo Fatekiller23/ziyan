@@ -1,3 +1,5 @@
+[sender]
+send_to_where = 'redis'
 [command]
 query_rate = 1
 
