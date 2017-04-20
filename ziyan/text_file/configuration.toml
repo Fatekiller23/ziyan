@@ -20,4 +20,5 @@ log_level = 'NOTICE'  #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
 log_file = 'log.log'
 backup_count = 5
 max_size = 1024
-format_string ='({record.time:%Y-%m-%d %H:%M:%S.%f%z}),{record.level_name},[{record.thread_name}],{record.channel},{record.func_name}[{record.lineno}]: {record.message}'
+format_string ='({record.time:%Y-%m-%d %H:%M:%S}),{record.level_name},[{record.thread_name}],{record.channel}[{record.lineno}]: {record.message}'
+#simple version: format_string = '({record.time:%m-%d %H:%M:%S}){record.level_name},channel:{record.channel},line_{record.lineno}: {record.message}'
