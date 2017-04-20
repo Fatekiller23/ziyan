@@ -11,3 +11,13 @@ measurement = 'test_measurement'
 [handler.tag]
     eqpt_no = 'pec0-001'
     source = 's1'
+
+[logging]
+str_output = true
+str_level = 'DEBUG'   #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
+log_output = true
+log_level = 'NOTICE'  #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
+log_file = 'log.log'
+backup_count = 5
+max_size = 1024
+format_string ='({record.time:%Y-%m-%d %H:%M:%S.%f%z}),{record.level_name},[{record.thread_name}],{record.channel},{record.func_name}[{record.lineno}]: {record.message}'
