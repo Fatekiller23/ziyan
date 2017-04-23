@@ -6,6 +6,7 @@ import time
 import traceback
 
 import redis
+from redis.exceptions import ConnectionError
 from influxdb import InfluxDBClient
 
 
@@ -18,7 +19,6 @@ class RedisWrapper:
     db.script_load(lua_file)
     db.enqueue(**kwargs)  #入队
     """
-    conf = {'host': 'localhost', 'port': 6379, 'db': 1}
 
     def __init__(self, conf):
         """
@@ -40,10 +40,8 @@ class RedisWrapper:
         """
         while True:
             try:
-                a = self.keys()
-                del a
-                break
-            except Exception as e:
+                self.db.ping()
+            except ConnectionError:
                 traceback.print_exc()
                 time.sleep(2)
                 continue
