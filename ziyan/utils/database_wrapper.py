@@ -4,13 +4,15 @@
 """
 import time
 import traceback
-
 import redis
+from logbook import Logger
 from redis.exceptions import ConnectionError
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 from requests.exceptions import ConnectionError as Connectionerror
 
+
+log = Logger('database_wrapper')
 
 class RedisWrapper:
     """
@@ -44,7 +46,7 @@ class RedisWrapper:
             try:
                 self.db.ping()
             except ConnectionError:
-                traceback.print_exc()
+                log.error(traceback.print_exc())
                 time.sleep(2)
                 continue
 
@@ -143,7 +145,7 @@ class InfluxdbWrapper:
             try:
                 self.db.get_list_database()
             except (Connectionerror, InfluxDBClientError):
-                traceback.print_exc()
+                log.error(traceback.print_exc())
                 time.sleep(2)
                 continue
 
@@ -162,7 +164,7 @@ class InfluxdbWrapper:
     def swith_database(self, database):
         """
         Change the client’s database.
-        :param database: str, database nome
+        :param database: str, database name
         :return: None
         """
         self.db.switch_database(database)
