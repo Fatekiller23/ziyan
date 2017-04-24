@@ -8,6 +8,8 @@ import traceback
 import redis
 from redis.exceptions import ConnectionError
 from influxdb import InfluxDBClient
+from influxdb.exceptions import InfluxDBClientError
+from requests.exceptions import ConnectionError as Connectionerror
 
 
 class RedisWrapper:
@@ -101,10 +103,66 @@ class RedisWrapper:
 
 
 class InfluxdbWrapper:
+    """
+    包装 influxdb 库
+    
+    用法：
+    josn_data = [
+        {
+            "measurement": "cpu_load_short",
+            "tags": {
+                "host": "server01",
+                "region": "us-west"
+            },
+            "time": "2009-11-10T23:00:00Z",
+            "fields": {
+                "value": 0.64
+            }
+        }
+    ]
+    db = InfluxdbWrapper('localhost', 8086, 'root', 'root', db)
+    db.send(josn_data, retention_policy='specify')
+    """
     def __init__(self, conf):
         self.db = InfluxDBClient(
-            host=conf.get('host', 'local'),
+            host=conf.get('host', 'localhost'),
             port=conf.get('port', 8086),
             username=conf['username'],
             password=conf['password'],
-            database=conf['db'])
+            database=conf['db'],
+            timeout=conf.get('timeout', 1))
+        self.conf = conf
+        self.connect()
+
+    def connect(self):
+        """
+        初始化连接 Influxdb 数据库, 确保 Influxdb 连接成功 
+        :return: None
+        """
+        while True:
+            try:
+                self.db.get_list_database()
+            except (Connectionerror, InfluxDBClientError):
+                traceback.print_exc()
+                time.sleep(2)
+                continue
+
+    def send(self, josn_body, database=None, retention_policy=None):
+        """
+        Write to multiple time series names
+        :param join_body:  list of dictionaries, each dictionary represents a point, 
+                            the list of points to be written in the database
+        :param database: str,  the database to write the points to. Defaults to the client’s current database
+        :param retention_policy: str, the retention policy for the points. Defaults to None
+        :return: bool
+        """
+        return self.db.write_points(josn_body, time_precision=self.conf['time_precision']
+                                    , database=database, retention_policy=retention_policy)
+
+    def swith_database(self, database):
+        """
+        Change the client’s database.
+        :param database: str, database nome
+        :return: None
+        """
+        self.db.switch_database(database)
