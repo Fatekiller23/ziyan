@@ -45,6 +45,7 @@ class RedisWrapper:
         while True:
             try:
                 self.__db.ping()
+                break
             except ConnectionError:
                 log.error(traceback.print_exc())
                 time.sleep(2)
@@ -159,6 +160,7 @@ class InfluxdbWrapper:
         while True:
             try:
                 self.__db.get_list_database()
+                break
             except (Connectionerror, InfluxDBClientError):
                 log.error(traceback.print_exc())
                 time.sleep(2)
