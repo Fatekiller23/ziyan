@@ -1,6 +1,6 @@
 [sender]
     send_to_where = 'redis'
-    lua_path = 'text_file/enque_script.lua'
+    lua_path = 'lua/enque_script.lua'
 [command]
     query_rate = 1
 
