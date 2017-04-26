@@ -1,24 +1,25 @@
 [sender]
-send_to_where = 'redis'
+    send_to_where = 'redis'
+    lua_path = 'text_file/enque_script.lua'
 [command]
-query_rate = 1
+    query_rate = 1
 
 [check]
 
 [handler]
-field_name_list = ['Msg']
-measurement = 'test_measurement'
+    field_name_list = ['Msg']
+    measurement = 'test_measurement'
 [handler.tag]
     eqpt_no = 'pec0-001'
     source = 's1'
 
 [logging]
-str_output = true
-str_level = 'DEBUG'   #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
-log_output = true
-log_level = 'NOTICE'  #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
-log_file = 'log.log'
-backup_count = 5
-max_size = 1024
-format_string ='({record.time:%Y-%m-%d %H:%M:%S}),{record.level_name},[{record.thread_name}],{record.channel}[{record.lineno}]: {record.message}'
-#simple version: format_string = '({record.time:%m-%d %H:%M:%S}){record.level_name},channel:{record.channel},line_{record.lineno}: {record.message}'
+    str_output = true
+    str_level = 'DEBUG'   #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
+    log_output = true
+    log_level = 'NOTICE'  #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
+    log_file = 'log.log'
+    backup_count = 5
+    max_size = 1024
+    format_string ='({record.time:%Y-%m-%d %H:%M:%S}),{record.level_name},[{record.thread_name}],{record.channel}[{record.lineno}]: {record.message}'
+    #simple version: format_string = '({record.time:%m-%d %H:%M:%S}){record.level_name},channel:{record.channel},line_{record.lineno}: {record.message}'

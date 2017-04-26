@@ -9,6 +9,7 @@ class Sender:
 
     def __init__(self, configuration):
         self.to_where = configuration['sender']['send_to_where']
+        self.lua_path = configuration['sender']['lua_path']
         if self.to_where == 'redis':
             from ziyan.utils.database_wrapper import RedisWrapper
             # Fixme 目前暂时调试 以后调试需要更改
@@ -52,6 +53,6 @@ class Sender:
         measurement = msgpack.packb(data.pop('measurement'))
 
         if self.to_where == 'redis':
-            self.redis.script_load(r'lua\enque_script.lua')
+            self.redis.script_load(self.lua_path)
             print(self.redis.enqueue(timestamp=timestamp, tags=tags,
                                      fields=fields, measurement=measurement))

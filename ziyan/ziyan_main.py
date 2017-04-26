@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+import types
 from queue import Queue
 from threading import Thread
 
@@ -52,15 +53,21 @@ class Check(object):
             cmd = command_queue.get()
 
             # 使用用户逻辑查询数据
-            raw_data = self.user_check(cmd)
+            raw_datas = self.user_check(cmd)
 
-            # 将查询到的数据传至handler
-            data_queue.put(raw_data)
+            if isinstance(raw_datas, types.GeneratorType):
+                for raw_data in raw_datas:
+                    # 将查询到的数据传至handler
+                    data_queue.put(raw_data)
+            else:
+                # 将查询到的数据传至handler
+                data_queue.put(raw_datas)
 
     def user_check(self, command):
 
         if command == 1:
-            return Check.data
+            yield Check.data
+            yield Check.data
         pass  # for debugging use.
 
 
@@ -76,25 +83,37 @@ class Handler(object):
             self.data_queue = data_queue = queues['data_queue']
             self.sender_pipe = queues['sender']
             raw_data = data_queue.get()
-            processed_dict = self.user_handle(raw_data)
-            self.enque_prepare(processed_dict)
+
+            processed_dicts = self.user_handle(raw_data)
+            self.enque_prepare(processed_dicts)
             time.sleep(1)
 
-    def enque_prepare(self, processed_dict):
+    def enque_prepare(self, processed_dicts):
         """
         
         :param processed_dict: 
         :return: fields, timestamp, tags, measurement
         """
-        value_list = processed_dict.get('data_value')
-        fields = dict(zip(self.field_name_list, value_list))
+        if isinstance(processed_dicts, (types.GeneratorType, list)):
+            for processed_dict in processed_dicts:
+                value_list = processed_dict.get('data_value')
+                fields = dict(zip(self.field_name_list, value_list))
 
-        # 从用户字典中获取时间，若没有，补充一个
-        timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
-        data = dict(self.data_dict)
-        data.update({'fields': fields, 'timestamp': timestamp})
-        self.sender_pipe.put(data)
-        pass
+                # 从用户字典中获取时间，若没有，补充一个
+                timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
+                data = dict(self.data_dict)
+                data.update({'fields': fields, 'timestamp': timestamp})
+                self.sender_pipe.put(data)
+
+        elif isinstance(processed_dicts, dict):
+            value_list = processed_dicts.get('data_value')
+            fields = dict(zip(self.field_name_list, value_list))
+
+            # 从用户字典中获取时间，若没有，补充一个
+            timestamp = processed_dicts.get('timestamp', pendulum.now().int_timestamp)
+            data = dict(self.data_dict)
+            data.update({'fields': fields, 'timestamp': timestamp})
+            self.sender_pipe.put(data)
 
     # tag measurement
     def user_handle(self, raw_data):
@@ -115,7 +134,7 @@ class Handler(object):
         # user 可以在handle里自己按数据格式制定tags
         user_postprocessed = {'data_value': data_value_list,
                               'tags': tags, }
-        return user_postprocessed
+        yield user_postprocessed
 
     def make_processed_dict(self, ):
         """
@@ -132,7 +151,7 @@ class Handler(object):
 def start():
     # 队列初始化
     queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
-    all_conf = get_conf('conf/config.toml')
+    all_conf = get_conf('text_file/configuration.toml')
     # 生成三个实例类
     commander = Command(all_conf)
     checker = Check(all_conf)

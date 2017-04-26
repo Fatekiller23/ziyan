@@ -33,8 +33,8 @@ def setup_logger(conf):
         StreamHandler(sys.stdout, level=str_level, format_string=format_string, bubble=True).push_application()
     # open local log file output
     if log_output is True:
-        RotatingFileHandler(logfile, mode='a', encoding='utf-8', level=log_level, \
-                            format_string=format_string, delay=False, max_size=max_size, \
+        RotatingFileHandler(logfile, mode='a', encoding='utf-8', level=log_level,
+                            format_string=format_string, delay=False, max_size=max_size,
                             backup_count=backup_count, filter=None, bubble=True
                             ).push_application()
 
