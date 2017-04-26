@@ -1,11 +1,10 @@
 # encoding: utf-8
 
 import argparse
-import os
-import traceback
-import shutil
 import glob
-
+import os
+import shutil
+import traceback
 
 def main():
     """
@@ -45,12 +44,13 @@ def make_directory(name):
             filepath = os.path.split(os.path.realpath(__file__))[0]
 
             for file in glob.glob(filepath + '/text_file/*.toml'):
-                filename = os.path.join(filepath + '/text_file/', file)
-                shutil.copy(filename, name + '/conf/config.toml')
+                shutil.copy(file, name + '/conf/config.toml')
 
             for file in glob.glob(filepath + '/text_file/*.lua'):
-                filename = os.path.join(filepath + '/text_file/', file)
-                shutil.copy(filename, name + '/lua/enque_script.lua')
+                shutil.copy(file, name + '/lua/enque_script.lua')
+
+            for file in glob.glob(filepath + '/plugins/*.py'):
+                shutil.copy(file, name + '/plugins/' + os.path.basename(file))
 
             shutil.copy(filepath + '/script/manage.py', name + '/manage.py')
     except Exception as e:
