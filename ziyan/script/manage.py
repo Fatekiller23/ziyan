@@ -30,6 +30,9 @@ def start():
         Thread(target=worker.work, args=(queue,), kwargs={'who': worker.name},
                name='t_%s' % worker.name, daemon=True).start()
 
+def test():
+    pass
+
 if __name__ == '__main__':
     parse = argparse.ArgumentParser(description='This is a parse')
     parse.add_argument('action', action='store')
@@ -39,4 +42,4 @@ if __name__ == '__main__':
         while True:
             pass
     elif command == 'test':
-        pass
+        test()
