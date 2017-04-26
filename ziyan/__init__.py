@@ -5,13 +5,6 @@ import glob
 import os
 import shutil
 import traceback
-from queue import Queue
-from threading import Thread
-
-from ziyan.lib.Sender import Sender
-from ziyan.plugins.plugin_prototype import *
-from ziyan.utils.util import get_conf
-
 
 def main():
     """
@@ -51,37 +44,14 @@ def make_directory(name):
             filepath = os.path.split(os.path.realpath(__file__))[0]
 
             for file in glob.glob(filepath + '/text_file/*.toml'):
-                filename = os.path.join(filepath + '/text_file/', file)
-                shutil.copy(filename, name + '/conf/config.toml')
+                shutil.copy(file, name + '/conf/config.toml')
 
             for file in glob.glob(filepath + '/text_file/*.lua'):
-                filename = os.path.join(filepath + '/text_file/', file)
-                shutil.copy(filename, name + '/lua/enque_script.lua')
+                shutil.copy(file, name + '/lua/enque_script.lua')
+
+            for file in glob.glob(filepath + '/plugins/*.py'):
+                shutil.copy(file, name + '/plugins/' + os.path.basename(file))
 
             shutil.copy(filepath + '/script/manage.py', name + '/manage.py')
     except Exception as e:
         traceback.print_exc()
-
-
-def start():
-    # 队列初始化
-    queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
-    all_conf = get_conf('conf/config.toml')
-    # 生成三个实例类
-    commander = MyCommand(all_conf)
-    checker = MyCheck(all_conf)
-    handler = MyHandler(all_conf)
-    sender = Sender(all_conf)
-
-    # 给实例赋名字
-    commander.name = 'commander'
-    checker.name = 'checker'
-    handler.name = 'handler'
-    sender.name = 'sender'
-
-    # 用于迭代
-    workers = [commander, checker, handler, sender]
-
-    for worker in workers:
-        Thread(target=worker.work, args=(queue,), kwargs={'who': worker.name},
-               name='t_%s' % worker.name, daemon=True).start()
