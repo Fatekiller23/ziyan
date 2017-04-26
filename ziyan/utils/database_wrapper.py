@@ -122,18 +122,33 @@ class InfluxdbWrapper:
             }
         }
     ]
-    db = InfluxdbWrapper('localhost', 8086, 'root', 'root', db)
+    db = InfluxdbWrapper('localhost', 8086, 'root', 'root', db) or InfluxdbWrapper(conf)
     db.send(josn_data, retention_policy='specify')
     """
-    def __init__(self, conf):
-        self.db = InfluxDBClient(
-            host=conf.get('host', 'localhost'),
-            port=conf.get('port', 8086),
-            username=conf['username'],
-            password=conf['password'],
-            database=conf['db'],
-            timeout=conf.get('timeout', 1))
-        self.conf = conf
+    def __init__(self, *args, **kwargs):
+        if args and args == 5:
+            self.db = InfluxDBClient(
+                host=args[0],
+                port=args[1],
+                username=args[2],
+                password=args[3],
+                database=args[4],
+                timeout=1
+            )
+        elif kwargs:
+            self.db = InfluxDBClient(
+                host=kwargs.get('host', 'localhost'),
+                port=kwargs.get('port', 8086),
+                username=kwargs['username'],
+                password=kwargs['password'],
+                database=kwargs['db'],
+                timeout=kwargs.get('timeout', 1)
+            )
+        else:
+            log.error('No influxdb address')
+        self.conf = kwargs
+
+        #测试 influxdb 连通性
         self.connect()
 
     def connect(self):
@@ -158,7 +173,7 @@ class InfluxdbWrapper:
         :param retention_policy: str, the retention policy for the points. Defaults to None
         :return: bool
         """
-        return self.db.write_points(josn_body, time_precision=self.conf['time_precision']
+        return self.db.write_points(josn_body, time_precision=self.conf.get('time_precision', 's')
                                     , database=database, retention_policy=retention_policy)
 
     def swith_database(self, database):
