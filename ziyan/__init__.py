@@ -39,20 +39,19 @@ def make_directory(name):
     """
     try:
         if not os.path.exists(name):
-            # os.mkdir(name)
-            os.makedirs(name + r'\conf')
-            os.mkdir(name + r'\lua')
-            os.mkdir(name + r'\plugins')
+            os.makedirs(name + '/conf')
+            os.mkdir(name + '/lua')
+            os.mkdir(name + '/plugins')
             filepath = os.path.split(os.path.realpath(__file__))[0]
 
-            for file in glob.glob(filepath + r'\text_file\*.toml'):
-                filename = os.path.join(filepath + '\\text_file\\', file)
-                shutil.copy(filename, name + r'\conf\config.toml')
+            for file in glob.glob(filepath + '/text_file/*.toml'):
+                filename = os.path.join(filepath + '/text_file/', file)
+                shutil.copy(filename, name + '/conf/config.toml')
 
-            for file in glob.glob(filepath + r'\text_file\*.lua'):
-                filename = os.path.join(filepath + '\\text_file\\', file)
-                shutil.copy(filename, name + r'\lua\enque_script.lua')
+            for file in glob.glob(filepath + '/text_file/*.lua'):
+                filename = os.path.join(filepath + '/text_file/', file)
+                shutil.copy(filename, name + '/lua/enque_script.lua')
 
-            shutil.copy(filepath+r'\script\manage.py', name + r'\manage.py')
+            shutil.copy(filepath + '/script/manage.py', name + '/manage.py')
     except Exception as e:
         traceback.print_exc()
