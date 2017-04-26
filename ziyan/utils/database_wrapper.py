@@ -32,19 +32,19 @@ class RedisWrapper:
             host=conf.get('host', 'localhost'),
             port=conf.get('port', 6379),
             db=conf.get('db', 0))
-        self.db = redis.Redis(connection_pool=pool)
+        self.__db = redis.Redis(connection_pool=pool)
 
         # 测试redis连通性
-        self.connect()
+        self.__connect()
 
-    def connect(self):
+    def __connect(self):
         """
         初始化连接 Redis 数据库, 确保 redis 连接成功 
         :return: None
         """
         while True:
             try:
-                self.db.ping()
+                self.__db.ping()
             except ConnectionError:
                 log.error(traceback.print_exc())
                 time.sleep(2)
@@ -58,7 +58,7 @@ class RedisWrapper:
         """
         with open(lua_script_file, 'r') as fn:
             script = fn.read()
-            self.sha = self.db.script_load(script)
+            self.sha = self.__db.script_load(script)
 
     def enqueue(self, **kwargs):
         """
@@ -70,38 +70,38 @@ class RedisWrapper:
         tags = kwargs.pop('tags')
         fields = kwargs.pop('fields')
         measurement = kwargs.pop('measurement')
-        return self.db.evalsha(self.sha, 1, tags, timestamp, fields, measurement)
+        return self.__db.evalsha(self.sha, 1, tags, timestamp, fields, measurement)
 
     def dequeue(self, key):
         """
         Remove and return the first item of the list ``data_queue``
         if ``data_queue`` is an empty list, block indefinitely
         """
-        return self.db.blpop(key)
+        return self.__db.blpop(key)
 
     def get_len(self, key):
         """
         Return the length of the list ``data_queue``
         """
-        return self.db.llen(key)
+        return self.__db.llen(key)
 
     def queue_back(self, key, data):
         """
         Push the data onto the head of the list ``data_queue``
         """
-        return self.db.lpush(key, data)
+        return self.__db.lpush(key, data)
 
     def flushdb(self):
         """
         Delete all keys in the current database
         """
-        return self.db.flushdb()
+        return self.__db.flushdb()
 
     def keys(self, pattern='*'):
         """
         Returns a list of keys matching ``pattern``
         """
-        return self.db.keys(pattern)
+        return self.__db.keys(pattern)
 
 
 class InfluxdbWrapper:
@@ -126,8 +126,8 @@ class InfluxdbWrapper:
     db.send(josn_data, retention_policy='specify')
     """
     def __init__(self, *args, **kwargs):
-        if args and args == 5:
-            self.db = InfluxDBClient(
+        if args and len(args) == 5:
+            self.__db = InfluxDBClient(
                 host=args[0],
                 port=args[1],
                 username=args[2],
@@ -136,7 +136,7 @@ class InfluxdbWrapper:
                 timeout=1
             )
         elif kwargs:
-            self.db = InfluxDBClient(
+            self.__db = InfluxDBClient(
                 host=kwargs.get('host', 'localhost'),
                 port=kwargs.get('port', 8086),
                 username=kwargs['username'],
@@ -149,16 +149,16 @@ class InfluxdbWrapper:
         self.conf = kwargs
 
         #测试 influxdb 连通性
-        self.connect()
+        self.__connect()
 
-    def connect(self):
+    def __connect(self):
         """
         初始化连接 Influxdb 数据库, 确保 Influxdb 连接成功 
         :return: None
         """
         while True:
             try:
-                self.db.get_list_database()
+                self.__db.get_list_database()
             except (Connectionerror, InfluxDBClientError):
                 log.error(traceback.print_exc())
                 time.sleep(2)
@@ -173,7 +173,7 @@ class InfluxdbWrapper:
         :param retention_policy: str, the retention policy for the points. Defaults to None
         :return: bool
         """
-        return self.db.write_points(json_body, time_precision=self.conf.get('time_precision', 's')
+        return self.__db.write_points(json_body, time_precision=self.conf.get('time_precision', 's')
                                     , database=database, retention_policy=retention_policy)
 
     def swith_database(self, database):
@@ -182,4 +182,4 @@ class InfluxdbWrapper:
         :param database: str, database name
         :return: None
         """
-        self.db.switch_database(database)
+        self.__db.switch_database(database)
