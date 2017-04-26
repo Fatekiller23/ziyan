@@ -132,7 +132,7 @@ class Handler(object):
 def start():
     # 队列初始化
     queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
-    all_conf = get_conf('ziyan/text_file/configuration.toml')
+    all_conf = get_conf('conf/config.toml')
     # 生成三个实例类
     commander = Command(all_conf)
     checker = Check(all_conf)
