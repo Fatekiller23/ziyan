@@ -35,9 +35,9 @@ class RedisWrapper:
         self.__db = redis.Redis(connection_pool=pool)
 
         # 测试redis连通性
-        self.__connect()
+        self.test_connect()
 
-    def __connect(self):
+    def test_connect(self):
         """
         初始化连接 Redis 数据库, 确保 redis 连接成功 
         :return: None
@@ -45,7 +45,7 @@ class RedisWrapper:
         while True:
             try:
                 self.__db.ping()
-                break
+                return True
             except ConnectionError:
                 log.error(traceback.print_exc())
                 time.sleep(2)
@@ -150,9 +150,9 @@ class InfluxdbWrapper:
         self.conf = kwargs
 
         #测试 influxdb 连通性
-        self.__connect()
+        self.test_connect()
 
-    def __connect(self):
+    def test_connect(self):
         """
         初始化连接 Influxdb 数据库, 确保 Influxdb 连接成功 
         :return: None
@@ -160,7 +160,7 @@ class InfluxdbWrapper:
         while True:
             try:
                 self.__db.get_list_database()
-                break
+                return True
             except (Connectionerror, InfluxDBClientError):
                 log.error(traceback.print_exc())
                 time.sleep(2)

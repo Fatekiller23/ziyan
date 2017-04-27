@@ -14,7 +14,7 @@ class Sender:
             from ziyan.utils.database_wrapper import RedisWrapper
             # Fixme 目前暂时调试 以后调试需要更改
             conf = {'host': 'localhost', 'port': 6379, 'db': 1}
-            self.redis = RedisWrapper(conf)
+            self.db = RedisWrapper(conf)
 
         pass
 
@@ -53,6 +53,8 @@ class Sender:
         measurement = msgpack.packb(data.pop('measurement'))
 
         if self.to_where == 'redis':
-            self.redis.script_load(self.lua_path)
-            print(self.redis.enqueue(timestamp=timestamp, tags=tags,
-                                     fields=fields, measurement=measurement))
+            self.db.test_connect()
+            self.db.script_load(self.lua_path)
+            print(self.db.enqueue(timestamp=timestamp, tags=tags,
+                                  fields=fields, measurement=measurement))
+

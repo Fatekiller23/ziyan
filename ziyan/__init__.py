@@ -6,6 +6,7 @@ import os
 import shutil
 import traceback
 
+
 def main():
     """
     Get the project name
