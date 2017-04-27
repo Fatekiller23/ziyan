@@ -14,6 +14,7 @@ from requests.exceptions import ConnectionError as Connectionerror
 
 log = Logger('database_wrapper')
 
+
 class RedisWrapper:
     """
     包装 redis 库, 用 lua 脚本作为入队筛选机制
@@ -57,6 +58,7 @@ class RedisWrapper:
         :param lua_script_file: Lua file path
         :return: None
         """
+        self.test_connect()
         with open(lua_script_file, 'r') as fn:
             script = fn.read()
             self.sha = self.__db.script_load(script)
@@ -126,6 +128,7 @@ class InfluxdbWrapper:
     db = InfluxdbWrapper('localhost', 8086, 'root', 'root', db) or InfluxdbWrapper(conf)
     db.send(josn_data, retention_policy='specify')
     """
+
     def __init__(self, *args, **kwargs):
         if args and len(args) == 5:
             self.__db = InfluxDBClient(
@@ -149,7 +152,7 @@ class InfluxdbWrapper:
             log.error('No influxdb address')
         self.conf = kwargs
 
-        #测试 influxdb 连通性
+        # 测试 influxdb 连通性
         self.test_connect()
 
     def test_connect(self):
@@ -175,8 +178,9 @@ class InfluxdbWrapper:
         :param retention_policy: str, the retention policy for the points. Defaults to None
         :return: bool
         """
+        self.test_connect()
         return self.__db.write_points(json_body, time_precision=self.conf.get('time_precision', 's')
-                                    , database=database, retention_policy=retention_policy)
+                                      , database=database, retention_policy=retention_policy)
 
     def swith_database(self, database):
         """

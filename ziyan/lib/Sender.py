@@ -53,7 +53,6 @@ class Sender:
         measurement = msgpack.packb(data.pop('measurement'))
 
         if self.to_where == 'redis':
-            self.db.test_connect()
             self.db.script_load(self.lua_path)
             print(self.db.enqueue(timestamp=timestamp, tags=tags,
                                   fields=fields, measurement=measurement))

@@ -13,7 +13,7 @@
     eqpt_no = 'pec0-001'
     source = 's1'
 
-[logging]
+[log_configuration]
     str_output = true
     str_level = 'DEBUG'   #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
     log_output = true
