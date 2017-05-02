@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import glob
 from queue import Queue
 from threading import Thread
 
@@ -15,8 +16,12 @@ from ziyan.utils.util import get_conf
 def start():
     # 队列初始化
     queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
-    all_conf = get_conf('conf/config.toml')
 
+    all_conf = dict()
+    for conf in glob.glob('conf/*.toml'):
+        all_conf.update(get_conf(conf))
+
+    # 日志生成初始化
     setup_logger(all_conf['log_configuration'])
 
     # 生成四个实例类
