@@ -114,7 +114,7 @@ class Handler(object):
                 # 从用户字典中获取时间，若没有，补充一个
                 timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
 
-                update_dict = {'fields': fields}
+                update_dict = {'fields': fields, 'timestamp': timestamp}
 
                 if tags:
                     update_dict['tags'] = tags
