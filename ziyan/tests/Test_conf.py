@@ -10,6 +10,7 @@ class TestConfig(unittest.TestCase):
     """
     unittest for configuration file
     """
+
     def setUp(self):
         self.all_conf = dict()
         for conf in glob.glob('conf/*.toml'):
