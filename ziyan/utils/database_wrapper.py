@@ -162,7 +162,7 @@ class InfluxdbWrapper:
         """
         while True:
             try:
-                self.__db.get_list_database()
+                self.__db.query("show measurements;")
                 return True
             except (Connectionerror, InfluxDBClientError) as e:
                 log.error('\n' + str(e) + '\n')
@@ -189,3 +189,11 @@ class InfluxdbWrapper:
         :return: None
         """
         self.__db.switch_database(database)
+
+    def query(self, query):
+        """
+        Send a query to Influxdb
+        :param query: str, SQL-like query statement 
+        :return: always return a list
+        """
+        return self.__db.query(query)
