@@ -1,17 +1,41 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import glob
+import sys
+import time
+import unittest
+import os
 from queue import Queue
 from threading import Thread
+
+from plugins.your_plugin import *
+
 from ziyan.lib.Sender import Sender
+from ziyan.lib.Watchdog import watchdog
+from ziyan.tests import Test_conf
+from ziyan.utils.logbook_wrapper import setup_logger
 from ziyan.utils.util import get_conf
-from plugins.plugin_prototype import *
+
 
 def start():
     # 队列初始化
     queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
-    all_conf = get_conf('conf/config.toml')
-    # 生成三个实例类
+
+    all_conf = get_conf('conf/ziyan-main-conf.toml')
+
+    user_conf = {}
+    for conf in glob.glob('conf/*.toml'):
+        if os.path.basename(conf) == 'ziyan-main-conf.toml':
+            continue
+        user_conf.update(get_conf(conf))
+
+    all_conf['user_conf'] = user_conf
+
+    # 日志生成初始化
+    setup_logger(all_conf['log_configuration'])
+
+    # 生成四个实例类
     commander = MyCommand(all_conf)
     checker = MyCheck(all_conf)
     handler = MyHandler(all_conf)
@@ -26,20 +50,29 @@ def start():
     # 用于迭代
     workers = [commander, checker, handler, sender]
 
+    thread_set = set()
+
     for worker in workers:
-        Thread(target=worker.work, args=(queue,), kwargs={'who': worker.name},
-               name='t_%s' % worker.name, daemon=True).start()
+        thread = Thread(target=worker.work, args=(queue,), kwargs={},
+                        name='%s' % worker.name, daemon=True)
+        thread.start()
+        thread_set.add(thread)
+
+    Thread(target=watchdog, name='watchdog', args=(thread_set, workers, queue), daemon=True).start()
+
 
 def test():
-    pass
+    unittest.main(Test_conf, argv=sys.argv[1:])
+
 
 if __name__ == '__main__':
-    parse = argparse.ArgumentParser(description='This is a parse')
+    parse = argparse.ArgumentParser(description='A easy-to-use data collector with your device.')
     parse.add_argument('action', action='store')
     command = parse.parse_args().action
     if command == 'run':
         start()
         while True:
+            time.sleep(5)
             pass
     elif command == 'test':
         test()

@@ -14,6 +14,7 @@ from requests.exceptions import ConnectionError as Connectionerror
 
 log = Logger('database_wrapper')
 
+
 class RedisWrapper:
     """
     包装 redis 库, 用 lua 脚本作为入队筛选机制
@@ -35,9 +36,9 @@ class RedisWrapper:
         self.__db = redis.Redis(connection_pool=pool)
 
         # 测试redis连通性
-        self.__connect()
+        self.test_connect()
 
-    def __connect(self):
+    def test_connect(self):
         """
         初始化连接 Redis 数据库, 确保 redis 连接成功 
         :return: None
@@ -45,9 +46,9 @@ class RedisWrapper:
         while True:
             try:
                 self.__db.ping()
-                break
-            except ConnectionError:
-                log.error(traceback.print_exc())
+                return True
+            except ConnectionError as e:
+                log.error('\n' + str(e) + '\n')
                 time.sleep(2)
                 continue
 
@@ -57,6 +58,7 @@ class RedisWrapper:
         :param lua_script_file: Lua file path
         :return: None
         """
+        self.test_connect()
         with open(lua_script_file, 'r') as fn:
             script = fn.read()
             self.sha = self.__db.script_load(script)
@@ -126,6 +128,7 @@ class InfluxdbWrapper:
     db = InfluxdbWrapper('localhost', 8086, 'root', 'root', db) or InfluxdbWrapper(conf)
     db.send(josn_data, retention_policy='specify')
     """
+
     def __init__(self, *args, **kwargs):
         if args and len(args) == 5:
             self.__db = InfluxDBClient(
@@ -149,20 +152,20 @@ class InfluxdbWrapper:
             log.error('No influxdb address')
         self.conf = kwargs
 
-        #测试 influxdb 连通性
-        self.__connect()
+        # 测试 influxdb 连通性
+        self.test_connect()
 
-    def __connect(self):
+    def test_connect(self):
         """
         初始化连接 Influxdb 数据库, 确保 Influxdb 连接成功 
         :return: None
         """
         while True:
             try:
-                self.__db.get_list_database()
-                break
-            except (Connectionerror, InfluxDBClientError):
-                log.error(traceback.print_exc())
+                self.__db.query("show measurements;")
+                return True
+            except (Connectionerror, InfluxDBClientError) as e:
+                log.error('\n' + str(e) + '\n')
                 time.sleep(2)
                 continue
 
@@ -175,8 +178,9 @@ class InfluxdbWrapper:
         :param retention_policy: str, the retention policy for the points. Defaults to None
         :return: bool
         """
+        self.test_connect()
         return self.__db.write_points(json_body, time_precision=self.conf.get('time_precision', 's')
-                                    , database=database, retention_policy=retention_policy)
+                                      , database=database, retention_policy=retention_policy)
 
     def swith_database(self, database):
         """
@@ -185,3 +189,11 @@ class InfluxdbWrapper:
         :return: None
         """
         self.__db.switch_database(database)
+
+    def query(self, query):
+        """
+        Send a query to Influxdb
+        :param query: str, SQL-like query statement 
+        :return: always return a list
+        """
+        return self.__db.query(query)
