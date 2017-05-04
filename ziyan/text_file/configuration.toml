@@ -14,11 +14,11 @@
     source = 's1'
 
 [log_configuration]
-    str_output = true
-    str_level = 'DEBUG'   #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
-    log_output = true
-    log_level = 'NOTICE'  #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
-    log_file = 'log.log'
+    console = true
+    console_level = 'DEBUG'   #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
+    file = true
+    file_level = 'NOTICE'  #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
+    log_file = 'logs/log.log'
     backup_count = 5
     max_size = 1024
     format_string ='({record.time:%Y-%m-%d %H:%M:%S}),{record.level_name},[{record.thread_name}],{record.channel}[{record.lineno}]: {record.message}'
