@@ -45,7 +45,7 @@ if __name__ == '__main__':
     from ziyan.utils.util import get_conf
     from logbook import Logger
 
-    conf = get_conf('../text_file/configuration.toml')['log_configuration']
+    conf = get_conf('../text_file/ziyan-main-conf.toml')['log_configuration']
     setup_logger(conf)
     log = Logger('test')
     log.debug(conf)

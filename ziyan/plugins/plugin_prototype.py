@@ -7,6 +7,11 @@ class MyCommand(Command):
         super(MyCommand, self).__init__(configuration=configuration)
 
     def user_create_command(self):
+        """
+        put your command here to activate the request data logic.
+
+        :return: cmd, this variable will be send to user_check as a command parameter.
+        """
         cmd = 1
         return cmd
 
@@ -16,8 +21,13 @@ class MyCheck(Check):
         super(MyCheck, self).__init__(configuration=configuration)
 
     def user_check(self, command):
+        """
+
+        :param command: user defined parameter.
+        :return: the data you requested.
+        """
         if command == 1:
-            return Check.data
+            yield Check.data
 
 
 class MyHandler(Handler):
@@ -42,4 +52,4 @@ class MyHandler(Handler):
         # user 可以在handle里自己按数据格式制定tags
         user_postprocessed = {'data_value': data_value_list,
                               'tags': tags, }
-        return user_postprocessed
+        yield user_postprocessed

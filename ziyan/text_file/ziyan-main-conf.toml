@@ -1,17 +1,9 @@
+[ziyan]
+    query_rate = 1
+
 [sender]
     send_to_where = 'redis'
     lua_path = 'lua/enque_script.lua'
-[command]
-    query_rate = 1
-
-[check]
-
-[handler]
-    field_name_list = ['Msg']
-    measurement = 'test_measurement'
-[handler.tag]
-    eqpt_no = 'pec0-001'
-    source = 's1'
 
 [log_configuration]
     str_output = true

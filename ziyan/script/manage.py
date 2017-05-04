@@ -5,7 +5,7 @@ import glob
 from queue import Queue
 from threading import Thread
 
-from plugins.plugin_prototype import *
+from plugins.your_plguin import *
 
 from ziyan.lib.Sender import Sender
 from ziyan.lib.Watchdog import watchdog

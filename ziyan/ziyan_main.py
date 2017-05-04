@@ -12,10 +12,10 @@ from ziyan.utils.util import get_conf
 
 class Command(object):
     def __init__(self, configuration):
-        self.conf = configuration['command']
+        self.conf = configuration
 
         # 类相关属性
-        self.query_rate = self.conf['query_rate']
+        self.query_rate = self.conf['ziyan']['query_rate']
         pass
 
     def work(self, queues, **kwargs):
@@ -32,15 +32,18 @@ class Command(object):
             time.sleep(self.query_rate)
 
     def user_create_command(self):
-        cmd = 1
-        return cmd
+        """
+        base function
+        :return: 
+        """
+        pass
 
 
 class Check(object):
     data = '我是check的data'
 
     def __init__(self, configuration):
-        self.conf = configuration['check']
+        self.conf = configuration
         pass
 
     def work(self, queues, **kwargs):
@@ -64,18 +67,19 @@ class Check(object):
                 data_queue.put(raw_datas)
 
     def user_check(self, command):
-
-        if command == 1:
-            yield Check.data
-            yield Check.data
-        pass  # for debugging use.
+        """
+        base function
+        :param command: 
+        :return: 
+        """
+        pass
 
 
 class Handler(object):
     def __init__(self, configuration):
-        self.conf = configuration['handler']
+        self.conf = configuration
         self.make_processed_dict()
-        self.field_name_list = self.conf['field_name_list']
+        self.field_name_list = configuration['user_conf']['handler']['field_name_list']
         pass
 
     def work(self, queues, **kwargs):
@@ -126,15 +130,7 @@ class Handler(object):
         :param raw_data: 
         :return: 
         """
-        # 数据经过处理之后生成 value_list
-        data_value_list = [raw_data]
-
-        tags = {'user_defined_tag': 'data_ralated_tag'}
-
-        # user 可以在handle里自己按数据格式制定tags
-        user_postprocessed = {'data_value': data_value_list,
-                              'tags': tags, }
-        yield user_postprocessed
+        pass
 
     def make_processed_dict(self, ):
         """
@@ -142,8 +138,8 @@ class Handler(object):
         注册在类信息中。
         :return: None 
         """
-        tags = self.conf['tag']
-        measurement = self.conf['measurement']
+        tags = self.conf['user_conf']['handler']['tag']
+        measurement = self.conf['user_conf']['handler']['measurement']
         self.data_dict = {'fields': None,
                           'tags': tags, 'measurement': measurement}
 
@@ -151,7 +147,7 @@ class Handler(object):
 def start():
     # 队列初始化
     queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
-    all_conf = get_conf('text_file/configuration.toml')
+    all_conf = get_conf('text_file/ziyan-main-conf.toml')
     # 生成三个实例类
     commander = Command(all_conf)
     checker = Check(all_conf)
