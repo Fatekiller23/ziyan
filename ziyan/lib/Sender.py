@@ -10,10 +10,10 @@ class Sender:
     def __init__(self, configuration):
         self.to_where = configuration['sender']['send_to_where']
         self.lua_path = configuration['sender']['lua_path']
+
         if self.to_where == 'redis':
             from ziyan.utils.database_wrapper import RedisWrapper
-            # Fixme 目前暂时调试 以后调试需要更改
-            conf = {'host': 'localhost', 'port': 6379, 'db': 1}
+            conf = configuration['sender']['redis']
             self.db = RedisWrapper(conf)
 
         pass
@@ -56,4 +56,3 @@ class Sender:
             self.db.script_load(self.lua_path)
             print(self.db.enqueue(timestamp=timestamp, tags=tags,
                                   fields=fields, measurement=measurement))
-

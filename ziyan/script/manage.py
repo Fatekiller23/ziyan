@@ -5,10 +5,11 @@ import glob
 import sys
 import time
 import unittest
+import os
 from queue import Queue
 from threading import Thread
 
-from plugins.plugin_prototype import *
+from plugins.your_plugin import *
 
 from ziyan.lib.Sender import Sender
 from ziyan.lib.Watchdog import watchdog
@@ -21,9 +22,15 @@ def start():
     # 队列初始化
     queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
 
-    all_conf = dict()
+    all_conf = get_conf('conf/ziyan-main-conf.toml')
+
+    user_conf = {}
     for conf in glob.glob('conf/*.toml'):
-        all_conf.update(get_conf(conf))
+        if os.path.basename(conf) == 'ziyan-main-conf.toml':
+            continue
+        user_conf.update(get_conf(conf))
+
+    all_conf['user_conf'] = user_conf
 
     # 日志生成初始化
     setup_logger(all_conf['log_configuration'])

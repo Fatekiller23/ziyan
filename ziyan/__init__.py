@@ -44,15 +44,23 @@ def make_directory(name):
             os.mkdir(name + '/plugins')
             filepath = os.path.split(os.path.realpath(__file__))[0]
 
+            # copy conf files
             for file in glob.glob(filepath + '/text_file/*.toml'):
-                shutil.copy(file, name + '/conf/config.toml')
+                base = os.path.basename(file)
+                shutil.copyfile(file, name + '/conf/' + base)
 
+            # copy lua files
             for file in glob.glob(filepath + '/text_file/*.lua'):
-                shutil.copy(file, name + '/lua/enque_script.lua')
+                shutil.copyfile(file, name + '/lua/enque_script.lua')
 
+            # copy userfiles
             for file in glob.glob(filepath + '/plugins/*.py'):
-                shutil.copy(file, name + '/plugins/' + os.path.basename(file))
+                base_name = os.path.basename(file)
+                if base_name == 'plugin_prototype.py':
+                    shutil.copyfile(file, name + '/plugins/' + 'your_plugin.py')
+                else:
+                    shutil.copyfile(file, name + '/plugins/' + os.path.basename(file))
 
-            shutil.copy(filepath + '/script/manage.py', name + '/manage.py')
+            shutil.copyfile(filepath + '/script/manage.py', name + '/manage.py')
     except Exception as e:
         traceback.print_exc()

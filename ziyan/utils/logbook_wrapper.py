@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import sys
-
+import os
 from logbook import StreamHandler, RotatingFileHandler
 from logbook import set_datetime_format
 
@@ -33,6 +33,9 @@ def setup_logger(conf):
         StreamHandler(sys.stdout, level=console_level, format_string=format_string, bubble=True).push_application()
     # open local log file output
     if file:
+        dir_path = os.path.dirname(logfile)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         RotatingFileHandler(logfile, mode='a', encoding='utf-8', level=file_level,
                             format_string=format_string, delay=False, max_size=max_size,
                             backup_count=backup_count, filter=None, bubble=True
@@ -45,7 +48,7 @@ if __name__ == '__main__':
     from ziyan.utils.util import get_conf
     from logbook import Logger
 
-    conf = get_conf('../text_file/configuration.toml')['log_configuration']
+    conf = get_conf('../text_file/ziyan-main-conf.toml')['log_configuration']
     setup_logger(conf)
     log = Logger('test')
     log.debug(conf)
