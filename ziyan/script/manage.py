@@ -2,6 +2,9 @@
 
 import argparse
 import glob
+import sys
+import time
+import unittest
 from queue import Queue
 from threading import Thread
 
@@ -9,6 +12,7 @@ from plugins.plugin_prototype import *
 
 from ziyan.lib.Sender import Sender
 from ziyan.lib.Watchdog import watchdog
+from ziyan.tests import Test_conf
 from ziyan.utils.logbook_wrapper import setup_logger
 from ziyan.utils.util import get_conf
 
@@ -51,7 +55,7 @@ def start():
 
 
 def test():
-    pass
+    unittest.main(Test_conf, argv=sys.argv[1:])
 
 
 if __name__ == '__main__':
@@ -61,6 +65,7 @@ if __name__ == '__main__':
     if command == 'run':
         start()
         while True:
+            time.sleep(5)
             pass
     elif command == 'test':
         test()
