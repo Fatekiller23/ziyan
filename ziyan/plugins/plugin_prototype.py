@@ -41,9 +41,17 @@ class MyHandler(Handler):
         tags, 根据数据得到的tag
         data_value 数据拼成的list
         measurement 根据数据类型得到的 influxdb表明
+
+        e.g:
+        {'data_value':[list], required
+        'tags':[dict],        optional
+        'measurement',[str]   optional
+        'timestamp',int}      optional
+
         :param raw_data: 
         :return: 
         """
+        # exmple.
         # 数据经过处理之后生成 value_list
         data_value_list = [raw_data]
 

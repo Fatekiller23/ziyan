@@ -101,12 +101,29 @@ class Handler(object):
         if isinstance(processed_dicts, (types.GeneratorType, list)):
             for processed_dict in processed_dicts:
                 value_list = processed_dict.get('data_value')
+
+                # user field list
                 fields = dict(zip(self.field_name_list, value_list))
+
+                # user tags
+                tags = processed_dict.get('tags', None)
+
+                # user measurement
+                measurement = processed_dict.get('measurement', None)
 
                 # 从用户字典中获取时间，若没有，补充一个
                 timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
+
+                update_dict = {'fields': fields}
+
+                if tags:
+                    update_dict['tags'] = tags
+                if measurement:
+                    update_dict['measuremement'] = measurement
+
                 data = dict(self.data_dict)
-                data.update({'fields': fields, 'timestamp': timestamp})
+
+                data.update(update_dict)
                 self.sender_pipe.put(data)
 
         elif isinstance(processed_dicts, dict):

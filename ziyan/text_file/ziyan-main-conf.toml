@@ -4,6 +4,10 @@
 [sender]
     send_to_where = 'redis'
     lua_path = 'lua/enque_script.lua'
+    [sender.redis]
+        db=1
+        host='localhost'
+        port=6379
 
 [log_configuration]
     str_output = true
