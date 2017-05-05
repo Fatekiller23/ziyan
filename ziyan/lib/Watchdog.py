@@ -33,9 +33,9 @@ def watchdog(*args):
             threads_set = dict()
 
             for thread in dead_threads:
-                thread = threading.Thread(target=thread.work, args=(args[2],), kwargs={},
+                worker = threading.Thread(target=thread.work, args=(args[2],), kwargs={},
                                           name='%s' % thread.name, daemon=True)
-                thread.start()
+                worker.start()
                 threads_set[thread.name] = thread
 
             args[3].thread_set = threads_set
