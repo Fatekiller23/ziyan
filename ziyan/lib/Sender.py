@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import msgpack
+from logbook import Logger
+
+log = Logger('Sender')
 
 
 class Sender:
@@ -16,11 +19,14 @@ class Sender:
             conf = configuration['sender']['redis']
             self.db = RedisWrapper(conf)
 
+        # log format.
+        self.enque_log_flag = configuration['sender']['enque_log']
+        self.log_format = '\nmeasurement:{}\nunit:{}\ntimestamp:{}\ntags:{}\nfields:{}'
         pass
 
     def work(self, queue, **kwargs):
         """
-        
+
         :param queue: format {'fields': {'Msg': '我是check的data'}, 
                             'timestamp': 1492572292, 'tags': {'eqpt_no': 'pec0-001', 'source': 's1'}, 
                             'measurement': 'test_measurement'}
@@ -44,15 +50,27 @@ class Sender:
     def pack(self, data):
         """
         以发送的目标规定格式打包好数据
-        
+
         :return: 
         """
-        timestamp = data.pop('timestamp')
-        tags = msgpack.packb(data.pop('tags'))
-        fields = msgpack.packb(data.pop('fields'))
-        measurement = msgpack.packb(data.pop('measurement'))
+        measurement = data['measurement']
+        unit = data['unit']
+        timestamp = data['timestamp']
+        tags = data['tags']
+        fields = data['fields']
+        log_str = self.log_format.format(measurement, unit, timestamp, tags, fields)
+        if self.enque_log_flag:
+            log.info(log_str)
+
+        # for pack
+        tags = msgpack.packb(tags)
+        fields = msgpack.packb(fields)
+        measurement = msgpack.packb(measurement)
+        unit = msgpack.packb(unit)
+
 
         if self.to_where == 'redis':
             self.db.script_load(self.lua_path)
-            print(self.db.enqueue(timestamp=timestamp, tags=tags,
-                                  fields=fields, measurement=measurement))
+            lua_info = self.db.enqueue(timestamp=timestamp, tags=tags,
+                                       fields=fields, measurement=measurement, unit=unit)
+            log.info('\n' + lua_info.decode())

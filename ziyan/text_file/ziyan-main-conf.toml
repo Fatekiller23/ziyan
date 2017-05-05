@@ -1,9 +1,22 @@
 [ziyan]
+    # query rate unit(second)
     query_rate = 1
 
+    # unit s:second, u:microsecond.
+    unit = 's'
+
+
 [sender]
+    # set data output end.
     send_to_where = 'redis'
+
+    # specified your lua path.
     lua_path = 'lua/enque_script.lua'
+
+    # show enque log?
+    enque_log = true
+
+    # redis config.
     [sender.redis]
         db=1
         host='localhost'
