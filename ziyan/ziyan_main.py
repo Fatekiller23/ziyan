@@ -123,7 +123,7 @@ class Handler(object):
                 if self.unit == 's':
                     timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
                 else:
-                    timestamp = processed_dict.get('timestamp', pendulum.now().float_timestamp)
+                    timestamp = processed_dict.get('timestamp', pendulum.now().float_timestamp * 1000000)
 
                 update_dict = {'fields': fields, 'timestamp': timestamp}
 
@@ -156,7 +156,7 @@ class Handler(object):
             if self.unit == 's':
                 timestamp = processed_dicts.get('timestamp', pendulum.now().int_timestamp)
             else:
-                timestamp = processed_dicts.get('timestamp', pendulum.now().float_timestamp)
+                timestamp = processed_dicts.get('timestamp', pendulum.now().float_timestamp * 1000000)
 
             update_dict = {'fields': fields, 'timestamp': timestamp}
 
