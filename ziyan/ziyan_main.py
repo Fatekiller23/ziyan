@@ -103,7 +103,10 @@ class Handler(object):
                 value_list = processed_dict.get('data_value')
 
                 # user field list
-                fields = dict(zip(self.field_name_list, value_list))
+                if not isinstance(value_list, dict):
+                    fields = dict(zip(self.field_name_list, value_list))
+                else:
+                    fields = value_list
 
                 # user tags
                 tags = processed_dict.get('tags', None)
@@ -119,7 +122,7 @@ class Handler(object):
                 if tags:
                     update_dict['tags'] = tags
                 if measurement:
-                    update_dict['measuremement'] = measurement
+                    update_dict['measurement'] = measurement
 
                 data = dict(self.data_dict)
 

@@ -3,11 +3,14 @@
 [check]
 
 [handler]
+
     # you filed name list.
     field_name_list = ['Msg']
 
     # measurement name
     measurement = 'test_measurement'
+
+
 [handler.tag]
     # some tags.
     eqpt_no = 'pec0-001'
