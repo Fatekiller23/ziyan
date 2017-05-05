@@ -20,7 +20,7 @@ class Sender:
 
     def work(self, queue, **kwargs):
         """
-        
+
         :param queue: format {'fields': {'Msg': '我是check的data'}, 
                             'timestamp': 1492572292, 'tags': {'eqpt_no': 'pec0-001', 'source': 's1'}, 
                             'measurement': 'test_measurement'}
@@ -44,15 +44,16 @@ class Sender:
     def pack(self, data):
         """
         以发送的目标规定格式打包好数据
-        
+
         :return: 
         """
         timestamp = data.pop('timestamp')
         tags = msgpack.packb(data.pop('tags'))
         fields = msgpack.packb(data.pop('fields'))
         measurement = msgpack.packb(data.pop('measurement'))
+        unit = msgpack.packb(data.pop('unit'))
 
         if self.to_where == 'redis':
             self.db.script_load(self.lua_path)
             print(self.db.enqueue(timestamp=timestamp, tags=tags,
-                                  fields=fields, measurement=measurement))
+                                  fields=fields, measurement=measurement, unit=unit))

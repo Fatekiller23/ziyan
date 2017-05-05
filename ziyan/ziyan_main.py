@@ -80,6 +80,9 @@ class Handler(object):
         self.conf = configuration
         self.make_processed_dict()
         self.field_name_list = configuration['user_conf']['handler']['field_name_list']
+        self.unit = configuration['ziyan'].get('unit', 's')
+        self.data_dict['unit'] = self.unit
+
         pass
 
     def work(self, queues, **kwargs):
@@ -94,15 +97,15 @@ class Handler(object):
 
     def enque_prepare(self, processed_dicts):
         """
-        
+
         :param processed_dict: 
         :return: fields, timestamp, tags, measurement
         """
         if isinstance(processed_dicts, (types.GeneratorType, list)):
             for processed_dict in processed_dicts:
-                value_list = processed_dict.get('data_value')
 
-                # user field list
+                # make fields.
+                value_list = processed_dict.get('data_value')
                 fields = dict(zip(self.field_name_list, value_list))
 
                 # user tags
@@ -112,27 +115,56 @@ class Handler(object):
                 measurement = processed_dict.get('measurement', None)
 
                 # 从用户字典中获取时间，若没有，补充一个
-                timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
+                if self.unit == 's':
+                    timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
+                else:
+                    timestamp = processed_dict.get('timestamp', pendulum.now().float_timestamp)
 
                 update_dict = {'fields': fields, 'timestamp': timestamp}
 
+                # 补充用户自定义tag，measurement.
                 if tags:
                     update_dict['tags'] = tags
                 if measurement:
                     update_dict['measuremement'] = measurement
 
+                # 复制初始数据字典
                 data = dict(self.data_dict)
 
-                data.update(update_dict)
+                # 数据更新
+                data.update({'fields': fields, 'timestamp': timestamp})
                 self.sender_pipe.put(data)
 
         elif isinstance(processed_dicts, dict):
+
+            # make fields.
             value_list = processed_dicts.get('data_value')
             fields = dict(zip(self.field_name_list, value_list))
 
+            # user tags
+            tags = processed_dict.get('tags', None)
+
+            # user measurement
+            measurement = processed_dict.get('measurement', None)
+
             # 从用户字典中获取时间，若没有，补充一个
-            timestamp = processed_dicts.get('timestamp', pendulum.now().int_timestamp)
+            if self.unit == 's':
+                timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
+            else:
+                timestamp = processed_dict.get('timestamp', pendulum.now().float_timestamp)
+
+            update_dict = {'fields': fields, 'timestamp': timestamp}
+
+            # 补充用户自定义tag，measurement.
+            if tags:
+                update_dict['tags'] = tags
+            if measurement:
+                update_dict['measuremement'] = measurement
+
+            # 复制初始数据字典
             data = dict(self.data_dict)
+
+            # 数据更新
             data.update({'fields': fields, 'timestamp': timestamp})
             self.sender_pipe.put(data)
 

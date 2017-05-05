@@ -1,5 +1,10 @@
 [ziyan]
+    # query rate unit(second)
     query_rate = 1
+
+    # unit s-->second, u----->microsecond.
+    # the default is second.
+    unit = 's'
 
 [sender]
     send_to_where = 'redis'
