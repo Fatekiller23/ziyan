@@ -98,7 +98,7 @@ class Handler(object):
     def enque_prepare(self, processed_dicts):
         """
 
-        :param processed_dict: 
+        :param processed_dicts: 
         :return: fields, timestamp, tags, measurement
         """
         if isinstance(processed_dicts, (types.GeneratorType, list)):
@@ -106,7 +106,12 @@ class Handler(object):
 
                 # make fields.
                 value_list = processed_dict.get('data_value')
-                fields = dict(zip(self.field_name_list, value_list))
+
+                # user field list
+                if not isinstance(value_list, dict):
+                    fields = dict(zip(self.field_name_list, value_list))
+                else:
+                    fields = value_list
 
                 # user tags
                 tags = processed_dict.get('tags', None)
@@ -142,16 +147,16 @@ class Handler(object):
             fields = dict(zip(self.field_name_list, value_list))
 
             # user tags
-            tags = processed_dict.get('tags', None)
+            tags = processed_dicts.get('tags', None)
 
             # user measurement
-            measurement = processed_dict.get('measurement', None)
+            measurement = processed_dicts.get('measurement', None)
 
             # 从用户字典中获取时间，若没有，补充一个
             if self.unit == 's':
-                timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
+                timestamp = processed_dicts.get('timestamp', pendulum.now().int_timestamp)
             else:
-                timestamp = processed_dict.get('timestamp', pendulum.now().float_timestamp)
+                timestamp = processed_dicts.get('timestamp', pendulum.now().float_timestamp)
 
             update_dict = {'fields': fields, 'timestamp': timestamp}
 

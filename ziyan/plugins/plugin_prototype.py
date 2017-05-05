@@ -39,15 +39,24 @@ class MyHandler(Handler):
         用户须输出一个dict，可以填写一下键值，也可以不填写
         timestamp， 从数据中处理得到的时间戳（整形?）
         tags, 根据数据得到的tag
-        data_value 数据拼成的list
-        measurement 根据数据类型得到的 influxdb表明
+        data_value 数据拼接形成的 list 或者 dict，如果为 list，则上层框架
+         对 list 与 field_name_list 自动组合；如果为 dict，则不处理，认为该数据
+         已经指定表名
+        measurement 根据数据类型得到的 influxdb表名
 
         e.g:
-        {'data_value':[list], required
+        list:
+        {'data_value':[list] , required
         'tags':[dict],        optional
         'measurement',[str]   optional
         'timestamp',int}      optional
 
+        dict：
+        {'data_value':{'fieldname': value} , required
+        'tags':[dict],        optional
+        'measurement',[str]   optional
+        'timestamp',int}      optional
+        
         :param raw_data: 
         :return: 
         """
