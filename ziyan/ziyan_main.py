@@ -126,7 +126,7 @@ class Handler(object):
                 if tags:
                     update_dict['tags'] = tags
                 if measurement:
-                    update_dict['measuremement'] = measurement
+                    update_dict['measurement'] = measurement
 
                 # 复制初始数据字典
                 data = dict(self.data_dict)
