@@ -3,7 +3,6 @@
 包装各种数据库模块, 使其易于使用
 """
 import time
-import traceback
 
 import redis
 from influxdb import InfluxDBClient
@@ -73,7 +72,8 @@ class RedisWrapper:
         tags = kwargs.pop('tags')
         fields = kwargs.pop('fields')
         measurement = kwargs.pop('measurement')
-        return self.__db.evalsha(self.sha, 1, tags, timestamp, fields, measurement)
+        unit = kwargs.get('unit', 's')
+        return self.__db.evalsha(self.sha, 1, tags, timestamp, fields, measurement, unit)
 
     def dequeue(self, key):
         """
