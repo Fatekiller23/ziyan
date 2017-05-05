@@ -26,7 +26,8 @@ class Command(object):
             # 使用用户逻辑创造command
             cmd = self.user_create_command()
 
-            command_queue.put(cmd)
+            if cmd:
+                command_queue.put(cmd)
 
             # 查询频次，以秒为单位
             time.sleep(self.query_rate)
@@ -56,15 +57,16 @@ class Check(object):
             cmd = command_queue.get()
 
             # 使用用户逻辑查询数据
-            raw_datas = self.user_check(cmd)
+            if cmd:
+                raw_datas = self.user_check(cmd)
 
-            if isinstance(raw_datas, types.GeneratorType):
-                for raw_data in raw_datas:
+                if isinstance(raw_datas, types.GeneratorType):
+                    for raw_data in raw_datas:
+                        # 将查询到的数据传至handler
+                        data_queue.put(raw_data)
+                else:
                     # 将查询到的数据传至handler
-                    data_queue.put(raw_data)
-            else:
-                # 将查询到的数据传至handler
-                data_queue.put(raw_datas)
+                    data_queue.put(raw_datas)
 
     def user_check(self, command):
         """
@@ -91,8 +93,9 @@ class Handler(object):
             self.sender_pipe = queues['sender']
             raw_data = data_queue.get()
 
-            processed_dicts = self.user_handle(raw_data)
-            self.enque_prepare(processed_dicts)
+            if raw_data:
+                processed_dicts = self.user_handle(raw_data)
+                self.enque_prepare(processed_dicts)
             time.sleep(1)
 
     def enque_prepare(self, processed_dicts):
