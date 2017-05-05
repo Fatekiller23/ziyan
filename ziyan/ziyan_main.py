@@ -170,7 +170,7 @@ class Handler(object):
             data = dict(self.data_dict)
 
             # 数据更新
-            data.update({'fields': fields, 'timestamp': timestamp})
+            data.update(update_dict)
             self.sender_pipe.put(data)
 
     # tag measurement
