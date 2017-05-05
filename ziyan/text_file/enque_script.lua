@@ -20,6 +20,7 @@ local tags = KEYS[1]
 local timestamp = ARGV[1]
 local fields = ARGV[2]
 local measurement = ARGV[3]
+local unit = ARGV[4]
 
 
 -- FUNCTION PART----------------------------------------------------------------------
@@ -63,8 +64,14 @@ end
 --for using two user variables f_flag and t_flag.
 local f_flag = nil; local t_flag = nil
 
+-- use unit to determine time_range.
+if cmsgpack.unpack(unit) == 'u' then
+    time_range = time_range * 1000000
+end
+
 
 f_flag, t_flag = threshold(fields, timestamp, time_range)
+
 
 if f_flag == true then
 
@@ -72,7 +79,8 @@ if f_flag == true then
         measurement = measurement,
         time = timestamp,
         fields = fields,
-        tags = tags
+        tags = tags,
+        unit = unit
     }
 
     local msg = cmsgpack.pack(data)
@@ -88,7 +96,8 @@ elseif t_flag == true then
         measurement = measurement,
         time = timestamp,
         fields = fields,
-        tags = tags
+        tags = tags,
+        unit = unit
     }
     local msg = cmsgpack.pack(data)
     redis.call("RPUSH", "data_queue", msg) -- msg queue
