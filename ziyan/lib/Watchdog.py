@@ -36,7 +36,7 @@ def watchdog(*args):
                 worker = threading.Thread(target=thread.work, args=(args[2],), kwargs={},
                                           name='%s' % thread.name, daemon=True)
                 worker.start()
-                threads_set[thread.name] = thread
+                threads_set[thread.name] = worker
 
             args[3].thread_set = threads_set
 
