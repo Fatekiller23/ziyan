@@ -8,6 +8,7 @@ import time
 import unittest
 from queue import Queue
 from threading import Thread
+from logbook import Logger
 
 from plugins.your_plugin import *
 
@@ -16,6 +17,8 @@ from ziyan.lib.Watchdog import watchdog, Maintainer
 from ziyan.tests import Test_conf
 from ziyan.utils.logbook_wrapper import setup_logger
 from ziyan.utils.util import get_conf
+
+log = Logger('start')
 
 
 def start():
@@ -83,7 +86,10 @@ if __name__ == '__main__':
         while True:
             for threadname, signal in record.thread_signal.items():
                 if time.time() - signal > 1200:
-                    record._async_raise(record.thread_set[threadname].ident, SystemExit)
+                    try:
+                        record._async_raise(record.thread_set[threadname].ident, SystemExit)
+                    except Exception as e:
+                        log.error('\nThere is something wrong')
             time.sleep(5)
     elif command == 'test':
         test()
