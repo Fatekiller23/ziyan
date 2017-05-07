@@ -57,13 +57,16 @@ def start():
     for worker in workers:
         thread = Thread(target=worker.work, args=(queue,),
                         kwargs={'name': worker.name, 'record': recorder},
-                        name='%s' % worker.name, daemon=True)
+                        name='%s' % worker.name)
+        thread.setDaemon(True)
         thread.start()
         thread_set[worker.name] = thread
 
     recorder.thread_set = thread_set
 
-    Thread(target=watchdog, name='watchdog', args=(thread_set, workers, queue, recorder), daemon=True).start()
+    watch = Thread(target=watchdog, name='watchdog', args=(thread_set, workers, queue, recorder))
+    watch.setDaemon(True)
+    watch.start()
     return recorder
 
 

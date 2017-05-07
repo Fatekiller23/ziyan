@@ -37,7 +37,8 @@ def watchdog(*args):
             for thread in dead_threads:
                 worker = threading.Thread(target=thread.work, args=(args[2],),
                                           kwargs={'name': thread.name, 'record': args[3]},
-                                          name='%s' % thread.name, daemon=True)
+                                          name='%s' % thread.name)
+                worker.setDaemon(True)
                 worker.start()
                 threads_set[thread.name] = worker
 
