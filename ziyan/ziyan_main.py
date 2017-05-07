@@ -29,6 +29,8 @@ class Command(object):
             if cmd:
                 command_queue.put(cmd)
 
+            kwargs['record'].thread_signal[kwargs['name']] = time.time()
+
             # 查询频次，以秒为单位
             time.sleep(self.query_rate)
 
@@ -68,6 +70,8 @@ class Check(object):
                     # 将查询到的数据传至handler
                     data_queue.put(raw_datas)
 
+            kwargs['record'].thread_signal[kwargs['name']] = time.time()
+
     def user_check(self, command):
         """
         base function
@@ -96,6 +100,9 @@ class Handler(object):
             if raw_data:
                 processed_dicts = self.user_handle(raw_data)
                 self.enque_prepare(processed_dicts)
+
+            kwargs['record'].thread_signal[kwargs['name']] = time.time()
+
             time.sleep(1)
 
     def enque_prepare(self, processed_dicts):
