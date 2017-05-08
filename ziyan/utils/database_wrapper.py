@@ -170,18 +170,19 @@ class InfluxdbWrapper:
                 time.sleep(2)
                 continue
 
-    def send(self, json_body, database=None, retention_policy=None):
+    def send(self, json_body, time_precision='s', database=None, retention_policy=None):
         """
         Write to multiple time series names
         :param json_body:  list of dictionaries, each dictionary represents a point, 
                             the list of points to be written in the database
+        :param time_precision: database time precision, default is second   
         :param database: str,  the database to write the points to. Defaults to the client’s current database
         :param retention_policy: str, the retention policy for the points. Defaults to None
         :return: bool
         """
         self.test_connect()
-        return self.__db.write_points(json_body, time_precision=self.conf.get('time_precision', 's')
-                                      , database=database, retention_policy=retention_policy)
+        return self.__db.write_points(json_body, time_precision=time_precision,
+                                      database=database, retention_policy=retention_policy)
 
     def swith_database(self, database):
         """
