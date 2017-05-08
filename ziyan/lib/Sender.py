@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import time
+
 import msgpack
 from logbook import Logger
 
@@ -38,6 +40,7 @@ class Sender:
             data = sender_pipe.get()
             self.pack(data)
 
+            kwargs['record'].thread_signal[kwargs['name']] = time.time()
         pass
 
     def send(self):

@@ -32,7 +32,7 @@ class RedisWrapper:
             host=conf.get('host', 'localhost'),
             port=conf.get('port', 6379),
             db=conf.get('db', 0))
-        self.__db = redis.Redis(connection_pool=pool)
+        self.__db = redis.StrictRedis(connection_pool=pool, socket_timeout=1)
 
         # 测试redis连通性
         self.test_connect()
