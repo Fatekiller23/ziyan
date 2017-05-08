@@ -81,7 +81,7 @@ class RedisWrapper:
         Remove and return the first item of the list ``data_queue``
         if ``data_queue`` is an empty list, block indefinitely
         """
-        return self.__db.blpop(key)
+        return self.__db.lpop(key)
 
     def get_len(self, key):
         """
@@ -139,6 +139,15 @@ class InfluxdbWrapper:
                 password=args[3],
                 database=args[4],
                 timeout=1
+            )
+        elif args and isinstance(args[0], dict):
+            self.__db = InfluxDBClient(
+                host=args[0].get('host', 'localhost'),
+                port=args[0].get('port', 8086),
+                username=args[0]['username'],
+                password=args[0]['password'],
+                database=args[0]['db'],
+                timeout=args[0].get('timeout', 1)
             )
         elif kwargs:
             self.__db = InfluxDBClient(
