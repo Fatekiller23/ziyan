@@ -70,7 +70,7 @@ if cmsgpack.unpack(unit) == 'u' then
 end
 
 
-f_flag, t_flag = threshold(fields, timestamp, time_range)
+f_flag, t_flag = threshold(fields, cmsgpack.unpack(timestamp), time_range)
 
 
 if f_flag == true then

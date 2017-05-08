@@ -81,7 +81,7 @@ class RedisWrapper:
         Remove and return the first item of the list ``data_queue``
         if ``data_queue`` is an empty list, block indefinitely
         """
-        return self.__db.blpop(key)
+        return self.__db.lpop(key)
 
     def get_len(self, key):
         """
@@ -140,6 +140,15 @@ class InfluxdbWrapper:
                 database=args[4],
                 timeout=1
             )
+        elif args and isinstance(args[0], dict):
+            self.__db = InfluxDBClient(
+                host=args[0].get('host', 'localhost'),
+                port=args[0].get('port', 8086),
+                username=args[0]['username'],
+                password=args[0]['password'],
+                database=args[0]['db'],
+                timeout=args[0].get('timeout', 1)
+            )
         elif kwargs:
             self.__db = InfluxDBClient(
                 host=kwargs.get('host', 'localhost'),
@@ -170,18 +179,19 @@ class InfluxdbWrapper:
                 time.sleep(2)
                 continue
 
-    def send(self, json_body, database=None, retention_policy=None):
+    def send(self, json_body, time_precision='s', database=None, retention_policy=None):
         """
         Write to multiple time series names
         :param json_body:  list of dictionaries, each dictionary represents a point, 
                             the list of points to be written in the database
+        :param time_precision: database time precision, default is second   
         :param database: str,  the database to write the points to. Defaults to the client’s current database
         :param retention_policy: str, the retention policy for the points. Defaults to None
         :return: bool
         """
         self.test_connect()
-        return self.__db.write_points(json_body, time_precision=self.conf.get('time_precision', 's')
-                                      , database=database, retention_policy=retention_policy)
+        return self.__db.write_points(json_body, time_precision=time_precision,
+                                      database=database, retention_policy=retention_policy)
 
     def swith_database(self, database):
         """

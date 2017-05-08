@@ -70,6 +70,7 @@ class Sender:
         fields = msgpack.packb(fields)
         measurement = msgpack.packb(measurement)
         unit = msgpack.packb(unit)
+        timestamp = msgpack.packb(timestamp)
 
 
         if self.to_where == 'redis':
