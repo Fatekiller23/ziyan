@@ -8,8 +8,8 @@ import time
 import unittest
 from queue import Queue
 from threading import Thread
-from logbook import Logger
 
+from logbook import Logger
 from plugins.your_plugin import *
 
 from ziyan.lib.Sender import Sender
@@ -84,12 +84,7 @@ if __name__ == '__main__':
     if command == 'run':
         record = start()
         while True:
-            for threadname, signal in record.thread_signal.items():
-                if time.time() - signal > 1200:
-                    try:
-                        record._async_raise(record.thread_set[threadname].ident, SystemExit)
-                    except Exception as e:
-                        log.error('\nThere is something wrong')
+            record.project()
             time.sleep(5)
     elif command == 'test':
         test()

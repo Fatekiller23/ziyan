@@ -65,3 +65,11 @@ class Maintainer:
             and you should call it again with exc=NULL to revert the effect"""
             ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
             log.error("PyThreadState_SetAsyncExc failed")
+
+    def project(self):
+        for threadname, singal in self.thread_signal.items():
+            if time.time() - singal > 1200:
+                try:
+                    self._async_raise(self.thread_set[threadname].ident, SystemExit)
+                except Exception as e:
+                    log.error('\nThere is something wrong')
