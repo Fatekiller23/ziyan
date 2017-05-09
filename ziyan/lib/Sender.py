@@ -24,7 +24,7 @@ class Sender:
 
         # log format.
         self.enque_log_flag = configuration['sender']['enque_log']
-        self.log_format = '\nmeasurement:{}\nunit:{}\ntimestamp:{}\ntags:{}\nfields:{}'
+        self.log_format = '\nmeasurement:{}\nunit:{}\ntimestamp:{}\ntags:{}\nfields:{}\n'
         pass
 
     def work(self, queue, **kwargs):
@@ -63,7 +63,11 @@ class Sender:
         tags = data['tags']
         fields = data['fields']
 
-        date_time = pendulum.from_timestamp(timestamp, tz='Asia/Shanghai').to_datetime_string()
+        if unit == 's':
+            date_time = pendulum.from_timestamp(timestamp, tz='Asia/Shanghai').to_datetime_string()
+        else:
+            date_time = pendulum.from_timestamp(timestamp / 1000000, tz='Asia/Shanghai').to_datetime_string()
+
         log_str = self.log_format.format(measurement, unit, date_time, tags, fields)
         if self.enque_log_flag:
             log.info(log_str)
@@ -74,7 +78,6 @@ class Sender:
         measurement = msgpack.packb(measurement)
         unit = msgpack.packb(unit)
         timestamp = msgpack.packb(timestamp)
-
 
         if self.to_where == 'redis':
             self.db.script_load(self.lua_path)
