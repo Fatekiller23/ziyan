@@ -5,10 +5,12 @@ from queue import Queue
 from threading import Thread
 
 import pendulum
+from logbook import Logger
 
 from ziyan.lib.Sender import Sender
 from ziyan.utils.util import get_conf
 
+log = Logger('main')
 
 class Command(object):
     def __init__(self, configuration):
@@ -28,6 +30,8 @@ class Command(object):
 
             if cmd:
                 command_queue.put(cmd)
+            else:
+                log.error('\nNo command send')
 
             kwargs['record'].thread_signal[kwargs['name']] = time.time()
 
@@ -69,6 +73,8 @@ class Check(object):
                 else:
                     # 将查询到的数据传至handler
                     data_queue.put(raw_datas)
+            else:
+                log.error('\nNo command received')
 
             kwargs['record'].thread_signal[kwargs['name']] = time.time()
 
@@ -100,6 +106,8 @@ class Handler(object):
             if raw_data:
                 processed_dicts = self.user_handle(raw_data)
                 self.enque_prepare(processed_dicts)
+            else:
+                log.error('\nNo data is received')
 
             kwargs['record'].thread_signal[kwargs['name']] = time.time()
 
