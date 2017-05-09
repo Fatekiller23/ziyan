@@ -2,6 +2,7 @@
 import time
 
 import msgpack
+import pendulum
 from logbook import Logger
 
 log = Logger('Sender')
@@ -61,7 +62,9 @@ class Sender:
         timestamp = data['timestamp']
         tags = data['tags']
         fields = data['fields']
-        log_str = self.log_format.format(measurement, unit, timestamp, tags, fields)
+
+        date_time = pendulum.from_timestamp(timestamp, tz='Asia/Shanghai').to_datetime_string()
+        log_str = self.log_format.format(measurement, unit, date_time, tags, fields)
         if self.enque_log_flag:
             log.info(log_str)
 
