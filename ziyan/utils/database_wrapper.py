@@ -140,6 +140,8 @@ class InfluxdbWrapper:
                 database=args[4],
                 timeout=10
             )
+            self.conf = args
+
         elif args and isinstance(args[0], dict):
             self.__db = InfluxDBClient(
                 host=args[0].get('host', 'localhost'),
@@ -149,6 +151,8 @@ class InfluxdbWrapper:
                 database=args[0]['db'],
                 timeout=args[0].get('timeout', 10)
             )
+            self.conf = args[0]
+
         elif kwargs:
             self.__db = InfluxDBClient(
                 host=kwargs.get('host', 'localhost'),
@@ -158,9 +162,10 @@ class InfluxdbWrapper:
                 database=kwargs['db'],
                 timeout=kwargs.get('timeout', 10)
             )
+            self.conf = kwargs
+
         else:
             log.error('No influxdb address')
-        self.conf = kwargs
 
         # 测试 influxdb 连通性
         self.test_connect()
@@ -172,7 +177,11 @@ class InfluxdbWrapper:
         """
         while True:
             try:
-                self.__db.query("show measurements;")
+                if isinstance(self.conf, dict):
+                    db = self.conf['db']
+                else:
+                    db = self.conf[4]
+                self.query("show retention policies on %s" % db)
                 return True
             except (Connectionerror, InfluxDBClientError, Exception) as e:
                 log.error('\n' + str(e) + '\n')
