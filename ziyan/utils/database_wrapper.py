@@ -46,7 +46,7 @@ class RedisWrapper:
             try:
                 self.__db.ping()
                 return True
-            except ConnectionError as e:
+            except (ConnectionError, Exception) as e:
                 log.error('\n' + str(e) + '\n')
                 time.sleep(2)
                 continue
@@ -138,7 +138,7 @@ class InfluxdbWrapper:
                 username=args[2],
                 password=args[3],
                 database=args[4],
-                timeout=1
+                timeout=10
             )
         elif args and isinstance(args[0], dict):
             self.__db = InfluxDBClient(
@@ -147,7 +147,7 @@ class InfluxdbWrapper:
                 username=args[0]['username'],
                 password=args[0]['password'],
                 database=args[0]['db'],
-                timeout=args[0].get('timeout', 1)
+                timeout=args[0].get('timeout', 10)
             )
         elif kwargs:
             self.__db = InfluxDBClient(
@@ -156,7 +156,7 @@ class InfluxdbWrapper:
                 username=kwargs['username'],
                 password=kwargs['password'],
                 database=kwargs['db'],
-                timeout=kwargs.get('timeout', 1)
+                timeout=kwargs.get('timeout', 10)
             )
         else:
             log.error('No influxdb address')
@@ -174,7 +174,7 @@ class InfluxdbWrapper:
             try:
                 self.__db.query("show measurements;")
                 return True
-            except (Connectionerror, InfluxDBClientError) as e:
+            except (Connectionerror, InfluxDBClientError, Exception) as e:
                 log.error('\n' + str(e) + '\n')
                 time.sleep(2)
                 continue
