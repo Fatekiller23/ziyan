@@ -5,10 +5,12 @@ from queue import Queue
 from threading import Thread
 
 import pendulum
+from logbook import Logger
 
 from ziyan.lib.Sender import Sender
 from ziyan.utils.util import get_conf
 
+log = Logger('main')
 
 class Command(object):
     def __init__(self, configuration):
@@ -28,6 +30,8 @@ class Command(object):
 
             if cmd:
                 command_queue.put(cmd)
+            else:
+                log.error('\nNo command send')
 
             kwargs['record'].thread_signal[kwargs['name']] = time.time()
 
@@ -69,6 +73,8 @@ class Check(object):
                 else:
                     # 将查询到的数据传至handler
                     data_queue.put(raw_datas)
+            else:
+                log.error('\nNo command received')
 
             kwargs['record'].thread_signal[kwargs['name']] = time.time()
 
@@ -100,6 +106,8 @@ class Handler(object):
             if raw_data:
                 processed_dicts = self.user_handle(raw_data)
                 self.enque_prepare(processed_dicts)
+            else:
+                log.error('\nNo data is received')
 
             kwargs['record'].thread_signal[kwargs['name']] = time.time()
 
@@ -133,7 +141,7 @@ class Handler(object):
                 if self.unit == 's':
                     timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
                 else:
-                    timestamp = processed_dict.get('timestamp', pendulum.now().float_timestamp * 1000000)
+                    timestamp = processed_dict.get('timestamp', int(pendulum.now().float_timestamp * 1000000))
 
                 update_dict = {'fields': fields, 'timestamp': timestamp}
 
@@ -147,7 +155,7 @@ class Handler(object):
                 data = dict(self.data_dict)
 
                 # 数据更新
-                data.update({'fields': fields, 'timestamp': timestamp})
+                data.update(update_dict)
                 self.sender_pipe.put(data)
 
         elif isinstance(processed_dicts, dict):
@@ -166,7 +174,7 @@ class Handler(object):
             if self.unit == 's':
                 timestamp = processed_dicts.get('timestamp', pendulum.now().int_timestamp)
             else:
-                timestamp = processed_dicts.get('timestamp', pendulum.now().float_timestamp * 1000000)
+                timestamp = processed_dicts.get('timestamp', int(pendulum.now().float_timestamp * 1000000))
 
             update_dict = {'fields': fields, 'timestamp': timestamp}
 

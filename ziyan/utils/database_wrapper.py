@@ -46,7 +46,7 @@ class RedisWrapper:
             try:
                 self.__db.ping()
                 return True
-            except ConnectionError as e:
+            except (ConnectionError, Exception) as e:
                 log.error('\n' + str(e) + '\n')
                 time.sleep(2)
                 continue
@@ -138,8 +138,10 @@ class InfluxdbWrapper:
                 username=args[2],
                 password=args[3],
                 database=args[4],
-                timeout=1
+                timeout=10
             )
+            self.conf = args
+
         elif args and isinstance(args[0], dict):
             self.__db = InfluxDBClient(
                 host=args[0].get('host', 'localhost'),
@@ -147,8 +149,10 @@ class InfluxdbWrapper:
                 username=args[0]['username'],
                 password=args[0]['password'],
                 database=args[0]['db'],
-                timeout=args[0].get('timeout', 1)
+                timeout=args[0].get('timeout', 10)
             )
+            self.conf = args[0]
+
         elif kwargs:
             self.__db = InfluxDBClient(
                 host=kwargs.get('host', 'localhost'),
@@ -156,11 +160,12 @@ class InfluxdbWrapper:
                 username=kwargs['username'],
                 password=kwargs['password'],
                 database=kwargs['db'],
-                timeout=kwargs.get('timeout', 1)
+                timeout=kwargs.get('timeout', 10)
             )
+            self.conf = kwargs
+
         else:
             log.error('No influxdb address')
-        self.conf = kwargs
 
         # 测试 influxdb 连通性
         self.test_connect()
@@ -172,9 +177,13 @@ class InfluxdbWrapper:
         """
         while True:
             try:
-                self.__db.query("show measurements;")
+                if isinstance(self.conf, dict):
+                    db = self.conf['db']
+                else:
+                    db = self.conf[4]
+                self.query("show retention policies on %s" % db)
                 return True
-            except (Connectionerror, InfluxDBClientError) as e:
+            except (Connectionerror, InfluxDBClientError, Exception) as e:
                 log.error('\n' + str(e) + '\n')
                 time.sleep(2)
                 continue

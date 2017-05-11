@@ -66,7 +66,7 @@ class Maintainer:
             ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
             log.error("PyThreadState_SetAsyncExc failed")
 
-    def project(self):
+    def protect(self):
         for threadname, singal in self.thread_signal.items():
             if time.time() - singal > 1200:
                 try:

@@ -84,7 +84,7 @@ if __name__ == '__main__':
     if command == 'run':
         record = start()
         while True:
-            record.project()
+            record.protect()
             time.sleep(5)
     elif command == 'test':
         test()
