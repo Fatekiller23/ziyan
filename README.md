@@ -1,6 +1,11 @@
 # ziyan
 A easy-to-use data collector with your device.
 
+## Support
+
+Python 3.4+
+Python 2.7.13
+
 ## Installation
 
 The last stable release is available on [releases](https://github.com/maboss-YCMan/ziyan/releases) or you can download the source code for installation.
