@@ -22,6 +22,11 @@ class Sender:
             conf = configuration['sender']['redis']
             self.db = RedisWrapper(conf)
 
+        elif self.to_where == 'influxdb':
+            from ziyan.utils.database_wrapper import InfluxdbWrapper
+            conf = configuration['sender']['influxdb']
+            self.db = InfluxdbWrapper(conf)
+
         # log format.
         self.enque_log_flag = configuration['sender']['enque_log']
         self.log_format = '\nmeasurement:{}\nunit:{}\ntimestamp:{}\ntags:{}\nfields:{}\n'
@@ -84,3 +89,17 @@ class Sender:
             lua_info = self.db.enqueue(timestamp=timestamp, tags=tags,
                                        fields=fields, measurement=measurement, unit=unit)
             log.info('\n' + lua_info.decode())
+
+        elif self.to_where == 'influxdb':
+            # influxdb data structure
+            josn_data = [
+                {
+                    'measurement': measurement,
+                    'tags': tags,
+                    'time': timestamp,
+                    'fields': fields
+                }
+            ]
+
+            info = self.db.send(josn_data, unit)
+            log.info('send data to inflxudb.{}, {}'.format(josn_data[0]['measurement'], info))
