@@ -177,11 +177,7 @@ class InfluxdbWrapper:
         """
         while True:
             try:
-                if isinstance(self.conf, dict):
-                    db = self.conf['db']
-                else:
-                    db = self.conf[4]
-                self.query("show retention policies on %s" % db)
+                self.query("show measurements limit 1")
                 return True
             except (Connectionerror, InfluxDBClientError, Exception) as e:
                 log.error('\n' + str(e) + '\n')
