@@ -6,7 +6,12 @@ import os
 import sys
 import time
 import unittest
-from queue import Queue
+
+try:
+    from queue import Queue
+except:
+    from Queue import Queue
+
 from threading import Thread
 
 from logbook import Logger

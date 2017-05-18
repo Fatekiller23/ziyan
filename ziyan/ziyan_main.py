@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 import time
 import types
-from queue import Queue
+
+try:
+    from queue import Queue
+except:
+    from Queue import Queue
+
 from threading import Thread
 
 import pendulum
@@ -11,6 +16,7 @@ from ziyan.lib.Sender import Sender
 from ziyan.utils.util import get_conf
 
 log = Logger('main')
+
 
 class Command(object):
     def __init__(self, configuration):

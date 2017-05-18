@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+from logbook import Logger
+
 from ziyan.ziyan_main import Command, Check, Handler
+
+log = Logger('plugins')
 
 
 class MyCommand(Command):

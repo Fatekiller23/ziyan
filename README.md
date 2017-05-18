@@ -4,7 +4,10 @@ A easy-to-use data collector with your device.
 ## Support
 
 Python 3.4+
+
 Python 2.7.13
+
+Python 2.7.12
 
 ## Installation
 
