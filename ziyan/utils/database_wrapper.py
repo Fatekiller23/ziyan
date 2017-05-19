@@ -176,11 +176,15 @@ class InfluxdbWrapper:
         :return: None
         """
         while True:
+            i = 0
             try:
                 self.query("show measurements limit 1")
                 return True
             except (Connectionerror, InfluxDBClientError, Exception) as e:
-                log.error('\n' + str(e) + '\n')
+                i += 1
+                if i > 10:
+                    raise Exception("/nCan't connect influxdb")
+                log.error(e)
                 time.sleep(2)
                 continue
 

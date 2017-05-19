@@ -101,5 +101,8 @@ class Sender:
                 }
             ]
 
-            info = self.db.send(josn_data, unit)
-            log.info('send data to inflxudb.{}, {}'.format(josn_data[0]['measurement'], info))
+            try:
+                info = self.db.send(josn_data, unit)
+                log.info('send data to inflxudb.{}, {}'.format(josn_data[0]['measurement'], info))
+            except Exception as e:
+                log.error(e)
