@@ -71,5 +71,6 @@ class Maintainer:
             if time.time() - singal > 1200:
                 try:
                     self._async_raise(self.thread_set[threadname].ident, SystemExit)
+                    log.warning("\n%s is timeout, kill it" % threadname)
                 except Exception as e:
                     log.error('\nThere is something wrong')

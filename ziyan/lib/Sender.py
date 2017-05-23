@@ -77,14 +77,15 @@ class Sender:
         if self.enque_log_flag:
             log.info(log_str)
 
-        # for pack
-        tags = msgpack.packb(tags)
-        fields = msgpack.packb(fields)
-        measurement = msgpack.packb(measurement)
-        unit = msgpack.packb(unit)
-        timestamp = msgpack.packb(timestamp)
-
         if self.to_where == 'redis':
+
+            # for pack
+            tags = msgpack.packb(tags)
+            fields = msgpack.packb(fields)
+            measurement = msgpack.packb(measurement)
+            unit = msgpack.packb(unit)
+            timestamp = msgpack.packb(timestamp)
+
             self.db.script_load(self.lua_path)
             lua_info = self.db.enqueue(timestamp=timestamp, tags=tags,
                                        fields=fields, measurement=measurement, unit=unit)
@@ -101,5 +102,8 @@ class Sender:
                 }
             ]
 
-            info = self.db.send(josn_data, unit)
-            log.info('send data to inflxudb.{}, {}'.format(josn_data[0]['measurement'], info))
+            try:
+                info = self.db.send(josn_data, unit)
+                log.info('send data to inflxudb.{}, {}'.format(josn_data[0]['measurement'], info))
+            except Exception as e:
+                log.error(e)
