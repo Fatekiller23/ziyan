@@ -2,9 +2,12 @@
 """
 包装各种数据库模块, 使其易于使用
 """
+import os
+import sqlite3
 import time
 
 import redis
+import umsgpack
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 from logbook import Logger
@@ -175,18 +178,17 @@ class InfluxdbWrapper:
         初始化连接 Influxdb 数据库, 确保 Influxdb 连接成功 
         :return: None
         """
+        i = 0
         while True:
-            i = 0
             try:
                 self.query("show measurements limit 1")
                 return True
             except (Connectionerror, InfluxDBClientError, Exception) as e:
                 i += 1
                 if i > 10:
-                    raise Exception("/nCan't connect influxdb")
+                    return False
                 log.error(e)
                 time.sleep(2)
-                continue
 
     def send(self, json_body, time_precision='s', database=None, retention_policy=None):
         """
@@ -198,9 +200,11 @@ class InfluxdbWrapper:
         :param retention_policy: str, the retention policy for the points. Defaults to None
         :return: bool
         """
-        self.test_connect()
-        return self.__db.write_points(json_body, time_precision=time_precision,
-                                      database=database, retention_policy=retention_policy)
+        if self.test_connect():
+            return self.__db.write_points(json_body, time_precision=time_precision,
+                                          database=database, retention_policy=retention_policy)
+        else:
+            return False
 
     def swith_database(self, database):
         """
@@ -217,3 +221,50 @@ class InfluxdbWrapper:
         :return: always return a list
         """
         return self.__db.query(query)
+
+
+class SqliteWrapper:
+    """
+    定制化包装 sqlite3 接口，让直传 influxdb 网络不通时，暂时将数据传入 sqlite
+    """
+
+    def __init__(self):
+        if not os.path.exists('sqlite'):
+            os.mkdir('sqlite')
+        self.conn = sqlite3.connect('sqlite/data.db')
+        self.cur = self.conn.cursor()
+        self.__table_exist()
+
+    def __table_exist(self):
+        self.cur.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='data'")
+        if self.cur.fetchone()[0] == 0:
+            self.cur.execute('CREATE TABLE data(id UNSIGNED BIG INT PRIMARY KEY AUTOINCREMENT,data TEXT,unit TEXT)')
+
+    def enqueue(self, data, unit):
+        data = umsgpack.packb(data)
+        unit = umsgpack.packb(unit)
+        self.cur.execute("INSERT INTO data (data,unit) VALUES(?,?)", (data, unit))
+        self.conn.commit()
+        self.cur.close()
+        self.conn.close()
+
+    def dequeue(self):
+        self.cur.execute("SELECT * FROM data")
+        results = self.cur.fetchone()
+        id = results[0]
+        data = umsgpack.unpackb(results[1])
+        unit = umsgpack.unpackb(results[2])
+        return id, data, unit
+
+    def del_data(self, id):
+        self.cur.execute("DELETE FROM data WHERE id = ?", (id,))
+        self.conn.commit()
+
+    def data_len(self):
+        self.cur.execute("SELECT count(*) FROM data")
+        return self.cur.fetchone()[0]
+
+    def drop(self):
+        self.cur.execute("DROP TABLE data")
+        self.cur.close()
+        self.conn.close()
