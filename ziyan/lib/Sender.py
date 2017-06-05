@@ -5,6 +5,8 @@ import msgpack
 import pendulum
 from logbook import Logger
 
+from ziyan.utils.database_wrapper import SqliteWrapper
+
 log = Logger('Sender')
 
 
@@ -21,11 +23,15 @@ class Sender:
             from ziyan.utils.database_wrapper import RedisWrapper
             conf = configuration['sender']['redis']
             self.db = RedisWrapper(conf)
+            self.db.script_load(self.lua_path)
 
         elif self.to_where == 'influxdb':
             from ziyan.utils.database_wrapper import InfluxdbWrapper
             conf = configuration['sender']['influxdb']
             self.db = InfluxdbWrapper(conf)
+            self.signal = False
+            self.old_data = None
+            self.old_time = None
 
         # log format.
         self.enque_log_flag = configuration['sender']['enque_log']
@@ -86,24 +92,74 @@ class Sender:
             unit = msgpack.packb(unit)
             timestamp = msgpack.packb(timestamp)
 
-            self.db.script_load(self.lua_path)
             lua_info = self.db.enqueue(timestamp=timestamp, tags=tags,
                                        fields=fields, measurement=measurement, unit=unit)
             log.info('\n' + lua_info.decode())
 
         elif self.to_where == 'influxdb':
-            # influxdb data structure
-            josn_data = [
-                {
-                    'measurement': measurement,
-                    'tags': tags,
-                    'time': timestamp,
-                    'fields': fields
-                }
-            ]
+            if self.threshold(fields, timestamp, unit):
+                # influxdb data structure
+                josn_data = [
+                    {
+                        'measurement': measurement,
+                        'tags': tags,
+                        'time': timestamp,
+                        'fields': fields
+                    }
+                ]
 
+                try:
+                    info = self.db.send(josn_data, unit)
+                    if info:
+                        log.info('send data to inflxudb.{}, {}'.format(josn_data[0]['measurement'], info))
+                        if self.signal:
+                            self.sqlite_to_influxdb()
+                            self.signal = False
+                    else:
+                        self.sqlite = SqliteWrapper()
+                        # When the network is unreachable, store the data in the local sqlite database
+                        self.sqlite.enqueue(josn_data, unit)
+                        self.signal = True
+                except Exception as e:
+                    log.error(e)
+
+    def sqlite_to_influxdb(self):
+        i = 1
+        self.sqlite = SqliteWrapper()
+        while True:
             try:
-                info = self.db.send(josn_data, unit)
-                log.info('send data to inflxudb.{}, {}'.format(josn_data[0]['measurement'], info))
+                if self.sqlite.data_len() > 0:
+                    results = self.sqlite.dequeue()
+                    info = self.db.send(results[1], results[2])
+                    log.info('sqlite send data to inflxudb.{}, {}'.format(results[1][0]['measurement'], info))
+                    self.sqlite.del_data(results[0])
+                else:
+                    self.sqlite.drop()
+                    break
             except Exception as e:
                 log.error(e)
+                i += 1
+                if i > 10:
+                    break
+
+    def threshold(self, fields, timestamp, unit):
+        """验证数据是否重复"""
+        time_range = 600
+
+        if unit == "s":
+            pass
+        else:
+            time_range *= 1000000
+
+        if self.old_data != fields:
+            self.old_data = fields
+            self.old_time = timestamp
+            return True
+
+        elif self.old_data == fields and timestamp - self.old_time < time_range:
+            log.info('ignoring schema worked!')
+            return False
+
+        elif self.old_data == fields and timestamp - self.old_time > time_range:
+            self.old_time = timestamp
+            return True
