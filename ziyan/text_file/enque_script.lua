@@ -1,6 +1,7 @@
 -- Creator: Marshall Fate
--- Date: 2016/11/26
--- Time: 16:56
+-- editor: driftluo
+-- CreateTime: 2016/11/26 16:56
+-- EditTime: 2017/06/07
 
 --this lua script is used for redis enque action with two conditions:
 --1. fields is diffrent with former fields which refers to old_fields in key threshold of redis
@@ -8,11 +9,11 @@
 --   is longer than the time range (user specified), as a heart beat.
 --The data can be enque at least one of above condition met, or just drop it.^_^
 
---  keys[1]  eqpt_no
+--  keys[1]  tags
 --  args[1]  timestamp
---  args[2]  tags
---  args[3]  fields
---  args[4]  measurement
+--  args[2]  fields
+--  args[3]  measurement
+--  args[4]  unit
 --set parameters:
 --how much seconds you want your time range is ???
 local time_range = 10
@@ -69,6 +70,10 @@ if cmsgpack.unpack(unit) == 'u' then
     time_range = time_range * 1000000
 end
 
+--Save the amount of data for 2 days based on a data of 5 seconds
+if redis.call("llen", "data_queue") > 2 * 24 * 60 * 60 / 5 then
+    redis.call("lpop", "data_queue")
+end
 
 f_flag, t_flag = threshold(fields, cmsgpack.unpack(timestamp), time_range)
 
@@ -88,8 +93,6 @@ if f_flag == true then
     return 'field enque worked~'
 
 elseif t_flag == true then
-
-
 
     local data = {
         heartbeat = true,
