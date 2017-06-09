@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import time
 import types
 
@@ -145,9 +146,9 @@ class Handler(object):
 
                 # 从用户字典中获取时间，若没有，补充一个
                 if self.unit == 's':
-                    timestamp = processed_dict.get('timestamp', pendulum.now().int_timestamp)
+                    timestamp = processed_dict.get('timestamp') or pendulum.now().int_timestamp
                 else:
-                    timestamp = processed_dict.get('timestamp', int(pendulum.now().float_timestamp * 1000000))
+                    timestamp = processed_dict.get('timestamp') or int(pendulum.now().float_timestamp * 1000000)
 
                 update_dict = {'fields': fields, 'timestamp': timestamp}
 
@@ -178,9 +179,9 @@ class Handler(object):
 
             # 从用户字典中获取时间，若没有，补充一个
             if self.unit == 's':
-                timestamp = processed_dicts.get('timestamp', pendulum.now().int_timestamp)
+                timestamp = processed_dicts.get('timestamp') or pendulum.now().int_timestamp
             else:
-                timestamp = processed_dicts.get('timestamp', int(pendulum.now().float_timestamp * 1000000))
+                timestamp = processed_dicts.get('timestamp') or int(pendulum.now().float_timestamp * 1000000)
 
             update_dict = {'fields': fields, 'timestamp': timestamp}
 
