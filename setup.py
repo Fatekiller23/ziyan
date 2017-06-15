@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ziyan',
-    version='0.0.1',
+    version='0.1.0',
     author='',
     author_email='',
     description='a easy-to-use data collector with your device.',
