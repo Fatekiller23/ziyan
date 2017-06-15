@@ -1,0 +1,42 @@
+[ziyan]
+    # query rate unit(second)
+    query_rate = 1
+
+    # unit s:second, u:microsecond.
+    unit = 's'
+
+
+[sender]
+    # set data output end.
+    send_to_where = 'redis'
+
+    # specified your lua path.
+    lua_path = 'lua/enque_script.lua'
+
+    # show enque log?
+    enque_log = true
+
+    # redis config.
+    [sender.redis]
+        db=1
+        host='localhost'
+        port=6379
+
+    # influxdb config
+    [sender.influxdb]
+        host = "10.203.96.26"
+        port = 8086
+        username ="eimuserw"
+        password = "max2016s0luto9"
+        db = "patac_eim"
+
+[log_configuration]
+    console = true
+    console_level = 'DEBUG'   #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
+    file = true
+    file_level = 'NOTICE'  #'DEBUG','INFO','NOTICE','WARNING','ERROR','CRITICAL'
+    log_file = 'logs/log.log'
+    backup_count = 5
+    max_size = 1024
+    format_string ='({record.time:%Y-%m-%d %H:%M:%S}),{record.level_name},[{record.thread_name}],{record.channel}[{record.lineno}]: {record.message}'
+    #simple version: format_string = '({record.time:%m-%d %H:%M:%S}){record.level_name},channel:{record.channel},line_{record.lineno}: {record.message}'
