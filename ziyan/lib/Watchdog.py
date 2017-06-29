@@ -1,7 +1,9 @@
 # -*- coding:utf-8 -*-
 
 import ctypes
+import hashlib
 import inspect
+import os
 import threading
 import time
 
@@ -36,7 +38,8 @@ def watchdog(*args):
 
             # 获取死去线程的实例集
             # 重新加载配置文件
-            dead_threads = [thread for thread in args[1](True) if thread.name in dead_threads]
+            a = args[1](True)
+            dead_threads = [thread for thread in a if thread.name in dead_threads]
 
             threads_set = dict()
 
@@ -57,6 +60,7 @@ class Maintainer:
     def __init__(self):
         self.thread_signal = dict()
         self.thread_set = None
+        self.sha = self.get_sha()
 
     def _async_raise(self, tid, exctype):
         """raises the exception, performs cleanup if needed"""
@@ -81,3 +85,24 @@ class Maintainer:
                     self.thread_signal[threadname] = time.time()
                 except Exception as e:
                     log.error('\nThere is something wrong')
+
+        if self.get_sha() != self.sha:
+            print(self.get_sha(), self.sha)
+            for thread in self.thread_set.values():
+                try:
+                    self._async_raise(thread.ident, SystemExit)
+                except Exception as e:
+                    log.error('\nThere is something wrong on sha')
+            log.warning("\nFile changes, program restart")
+            self.sha = self.get_sha()
+
+    def get_sha(self):
+        data = {}
+        for dirpath, dirnames, filenames in os.walk(r'.'):
+            for file in filenames:
+                if file[file.rfind('.') + 1:] in ['py', 'lua', 'toml']:
+                    data[os.path.join(dirpath, file)] = os.stat(os.path.join(dirpath, file)).st_mtime
+
+        data = sorted(data.items(), key=lambda d: d[0])
+        sha = hashlib.sha1(str(data).encode())
+        return sha.hexdigest()

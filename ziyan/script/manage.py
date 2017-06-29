@@ -30,7 +30,7 @@ if version_info[0] == 3:
 log = Logger('start')
 
 
-def class_instance(status=False):
+def conf():
     all_conf = get_conf("conf/ziyan-main-conf.toml")
 
     user_conf = {}
@@ -41,12 +41,15 @@ def class_instance(status=False):
 
     all_conf['user_conf'] = user_conf
 
+    return all_conf
+
+
+def class_instance(status=False):
     if status:
         reload(Sender)
         reload(plugins)
 
-    # 日志生成初始化
-    setup_logger(all_conf['log_configuration'])
+    all_conf = conf()
 
     # 生成四个实例类
     commander = plugins.MyCommand(all_conf)
@@ -66,6 +69,9 @@ def class_instance(status=False):
 def start():
     # 队列初始化
     queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
+
+    # 日志生成初始化
+    setup_logger(conf()['log_configuration'])
 
     # 用于迭代
     workers = class_instance()
