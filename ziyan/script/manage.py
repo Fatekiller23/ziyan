@@ -15,22 +15,23 @@ except:
 from threading import Thread
 
 from logbook import Logger
-from plugins.your_plugin import *
+import plugins.your_plugin as plugins
 
-from ziyan.lib.Sender import Sender
+import ziyan.lib.Sender as Sender
 from ziyan.lib.Watchdog import watchdog, Maintainer
 from ziyan.tests import Test_conf
 from ziyan.utils.logbook_wrapper import setup_logger
 from ziyan.utils.util import get_conf
+from sys import version_info
+
+if version_info[0] == 3:
+    from importlib import reload
 
 log = Logger('start')
 
 
-def start():
-    # 队列初始化
-    queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
-
-    all_conf = get_conf('conf/ziyan-main-conf.toml')
+def class_instance(status=False):
+    all_conf = get_conf("conf/ziyan-main-conf.toml")
 
     user_conf = {}
     for conf in glob.glob('conf/*.toml'):
@@ -40,14 +41,18 @@ def start():
 
     all_conf['user_conf'] = user_conf
 
+    if status:
+        reload(Sender)
+        reload(plugins)
+
     # 日志生成初始化
     setup_logger(all_conf['log_configuration'])
 
     # 生成四个实例类
-    commander = MyCommand(all_conf)
-    checker = MyCheck(all_conf)
-    handler = MyHandler(all_conf)
-    sender = Sender(all_conf)
+    commander = plugins.MyCommand(all_conf)
+    checker = plugins.MyCheck(all_conf)
+    handler = plugins.MyHandler(all_conf)
+    sender = Sender.Sender(all_conf)
 
     # 给实例赋名字
     commander.name = 'commander'
@@ -55,8 +60,15 @@ def start():
     handler.name = 'handler'
     sender.name = 'sender'
 
+    return [commander, checker, handler, sender]
+
+
+def start():
+    # 队列初始化
+    queue = {'command_queue': Queue(), 'data_queue': Queue(), 'sender': Queue()}
+
     # 用于迭代
-    workers = [commander, checker, handler, sender]
+    workers = class_instance()
 
     thread_set = dict()
 
@@ -72,7 +84,7 @@ def start():
 
     recorder.thread_set = thread_set
 
-    watch = Thread(target=watchdog, name='watchdog', args=(thread_set, workers, queue, recorder))
+    watch = Thread(target=watchdog, name='watchdog', args=(thread_set, class_instance, queue, recorder))
     watch.setDaemon(True)
     watch.start()
     return recorder

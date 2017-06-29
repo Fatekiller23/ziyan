@@ -13,6 +13,11 @@ log = Logger('watchdog')
 def watchdog(*args):
     """
     守护线程
+    :param args:
+        args[0]: dict, key:thread_name, value:thread_instance
+        args[1]: function, 重新生成类实例的方法
+        args[2]: dict, 线程间通信的 queue 集合
+        args[3]: 运行时的 Maintainer 的唯一实例
     :param args: 
     :return: None
     """
@@ -30,7 +35,8 @@ def watchdog(*args):
             dead_threads = threads_name - (threads - {'watchdog', 'MainThread'})
 
             # 获取死去线程的实例集
-            dead_threads = [thread for thread in args[1] if thread.name in dead_threads]
+            # 重新加载配置文件
+            dead_threads = [thread for thread in args[1](True) if thread.name in dead_threads]
 
             threads_set = dict()
 
