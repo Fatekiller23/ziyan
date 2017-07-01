@@ -98,7 +98,7 @@ class Handler(object):
     def __init__(self, configuration):
         self.conf = configuration
         self.make_processed_dict()
-        self.field_name_list = configuration['user_conf']['handler']['field_name_list']
+        self.field_name_list = configuration['user_conf']['handler'].get('field_name_list', None)
         self.unit = configuration['ziyan'].get('unit', 's')
         self.data_dict['unit'] = self.unit
 
