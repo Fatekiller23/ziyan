@@ -130,10 +130,10 @@ class Maintainer:
         if os.path.isfile(path):
             file_list.append(path)
         elif os.path.isdir(path):
-            for file in os.listdir(path):
+            for folder in os.listdir(path):
                 # 如果需要忽略某些文件夹，使用以下代码
-                if file in ["logs", ".idea"]:
+                if folder in ["logs", ".idea"]:
                     continue
-                new_dir = os.path.join(path, file)
+                new_dir = os.path.join(path, folder)
                 Maintainer.get_file_list(new_dir, file_list)
         return file_list
