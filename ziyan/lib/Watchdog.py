@@ -23,7 +23,9 @@ def watchdog(*args):
     :param args: 
     :return: None
     """
-    threads_name = {thread.name for thread in args[0].values()}
+    init_thread_set, class_instance, queue, recorder = args
+
+    threads_name = {thread.name for thread in init_thread_set.values()}
     while True:
 
         threads = set()
@@ -38,19 +40,19 @@ def watchdog(*args):
 
             # 获取死去线程的实例集
             # 重新加载配置文件
-            dead_threads = [thread for thread in args[1](True) if thread.name in dead_threads]
+            dead_threads = [thread for thread in class_instance(True) if thread.name in dead_threads]
 
             threads_set = dict()
 
             for thread in dead_threads:
-                worker = threading.Thread(target=thread.work, args=(args[2],),
-                                          kwargs={'name': thread.name, 'record': args[3]},
+                worker = threading.Thread(target=thread.work, args=(queue,),
+                                          kwargs={'name': thread.name, 'record': recorder},
                                           name='%s' % thread.name)
                 worker.setDaemon(True)
                 worker.start()
                 threads_set[thread.name] = worker
 
-            args[3].thread_set.update(threads_set)
+            recorder.thread_set.update(threads_set)
 
         time.sleep(10)
 
@@ -117,21 +119,21 @@ class Maintainer:
         return sha.hexdigest()
 
     @staticmethod
-    def get_file_list(l='.', filelist=list()):
+    def get_file_list(path='.', file_list=list()):
         """
         递归遍历工作目录，获取目录下的配置文件、python 文件、lua 文件列表
         :param l:
         :param filelist:
         :return: list
         """
-        new_dir = l
-        if os.path.isfile(l):
-            filelist.append(l)
-        elif os.path.isdir(l):
-            for s in os.listdir(l):
+        new_dir = path
+        if os.path.isfile(path):
+            file_list.append(path)
+        elif os.path.isdir(path):
+            for file in os.listdir(path):
                 # 如果需要忽略某些文件夹，使用以下代码
-                if s in ["logs", ".idea"]:
+                if file in ["logs", ".idea"]:
                     continue
-                new_dir = os.path.join(l, s)
-                Maintainer.get_file_list(new_dir, filelist)
-        return filelist
+                new_dir = os.path.join(path, file)
+                Maintainer.get_file_list(new_dir, file_list)
+        return file_list
