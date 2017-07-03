@@ -28,9 +28,9 @@ python setup.py install
 1. Generate project catalogs:
 
 ```
-$ ziyan_make projectname
+$ ziyan_make project_name
 
-$ cd progectname
+$ cd project_name
 ```
 
 2. The generated project is a test project that can run
