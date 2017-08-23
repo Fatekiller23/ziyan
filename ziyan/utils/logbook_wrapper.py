@@ -31,7 +31,7 @@ def setup_logger(conf):
     format_string = conf['format_string']  # log message format
     # open console print
     if console:
-        StreamHandler(sys.stdout, level=console_level, format_string=format_string, bubble=False).push_application()
+        StreamHandler(sys.stdout, level=console_level, format_string=format_string, bubble=True).push_application()
     # open local log file output
     if file:
         dir_path = os.path.dirname(logfile)
@@ -39,7 +39,7 @@ def setup_logger(conf):
             os.makedirs(dir_path)
         RotatingFileHandler(logfile, mode='a', encoding='utf-8', level=file_level,
                             format_string=format_string, delay=False, max_size=max_size,
-                            backup_count=backup_count, filter=None, bubble=False
+                            backup_count=backup_count, filter=None, bubble=True
                             ).push_application()
 
     return None
